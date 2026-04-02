@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_md">
+
+        <!-- Greeting Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingBottom="@dimen/spacing_md">
+
+            <TextView
+                android:id="@+id/tvGreeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bom dia, Luigi! 💪"
+                android:textSize="@dimen/text_xl"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Quarta, 2 de Abril"
+                android:textSize="@dimen/text_sm"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- Daily Tip Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_md"
+            app:cardBackgroundColor="@color/surface_card"
+            app:cardCornerRadius="@dimen/card_radius"
+            app:cardElevation="4dp">
+
+            <TextView
+                android:id="@+id/tvDailyTip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/spacing_md"
+                android:text="💪 Cada treino conta!"
+                android:textSize="@dimen/text_sm"
+                android:textColor="@color/text_secondary"
+                android:fontFamily="sans-serif-light" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Calories Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_md"
+            app:cardBackgroundColor="@color/surface_card"
+            app:cardCornerRadius="@dimen/card_radius"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔥 Calorias Hoje"
+                    android:textSize="@dimen/text_sm"
+                    android:textColor="@color/text_secondary"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="@dimen/spacing_sm">
+
+                    <TextView
+                        android:id="@+id/tvCaloriesConsumed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 kcal"
+                        android:textSize="@dimen/text_xxl"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvCaloriesGoal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="/ 1800 kcal"
+                        android:textSize="@dimen/text_md"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/progressCalories"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/progress_height"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:progressDrawable="@drawable/bg_progress_bar"
+                    android:max="1800"
+                    android:progress="0" />
+
+                <TextView
+                    android:id="@+id/tvCaloriesRemaining"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1800 kcal restantes"
+                    android:textSize="@dimen/text_xs"
+                    android:textColor="@color/text_hint"
+                    android:layout_marginTop="4dp" />
+
+                <!-- Macros Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/tvProtein"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="0g\nProteína"
+                        android:textSize="@dimen/text_sm"
+                        android:textColor="@color/protein_color"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="32dp"
+                        android:background="@color/divider" />
+
+                    <TextView
+                        android:id="@+id/tvCarbs"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="0g\nHidratos"
+                        android:textSize="@dimen/text_sm"
+                        android:textColor="@color/carbs_color"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="32dp"
+                        android:background="@color/divider" />
+
+                    <TextView
+                        android:id="@+id/tvFat"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="0g\nGordura"
+                        android:textSize="@dimen/text_sm"
+                        android:textColor="@color/fat_color"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Action buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:weightSum="2">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnLogMeal"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:text="🍽 Registar"
+                        android:textSize="@dimen/text_xs"
+                        style="@style/ButtonPrimary" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnGoToMeals"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:text="📋 Plano"
+                        android:textSize="@dimen/text_xs"
+                        style="@style/ButtonOutlined" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Today's Workout Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardTodayWorkout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_md"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="@color/surface_card"
+            app:cardCornerRadius="@dimen/card_radius"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
+
+                <TextView
+                    android:id="@+id/tvWorkoutStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Treino de Hoje"
+                    android:textSize="@dimen/text_sm"
+                    android:textColor="@color/text_secondary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvWorkoutName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pronto para treinar?"
+                    android:textSize="@dimen/text_lg"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/tvWorkoutDetail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Vai ao plano de treino para começar"
+                    android:textSize="@dimen/text_xs"
+                    android:textColor="@color/text_hint"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Water + Weight Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="@dimen/spacing_md"
+            android:weightSum="2">
+
+            <!-- Water Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardCornerRadius="@dimen/card_radius"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💧 Água"
+                        android:textSize="@dimen/text_sm"
+                        android:textColor="@color/text_secondary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvWaterCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 / 8 💧"
+                        android:textSize="@dimen/text_lg"
+                        android:textColor="@color/info"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+
+                    <ProgressBar
+                        android:id="@+id/progressWater"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/progress_height_thin"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:progressDrawable="@drawable/bg_progress_water"
+                        android:max="8"
+                        android:progress="0" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginTop="@dimen/spacing_sm">
+
+                        <Button
+                            android:id="@+id/btnRemoveWater"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:text="-"
+                            android:textColor="@color/text_primary"
+                            android:background="@drawable/bg_circle_button"
+                            android:textSize="16sp"
+                            android:padding="0dp" />
+
+                        <Button
+                            android:id="@+id/btnAddWater"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_marginStart="12dp"
+                            android:text="+"
+                            android:textColor="@color/text_primary"
+                            android:background="@drawable/bg_circle_button"
+                            android:textSize="16sp"
+                            android:padding="0dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Weight Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardCornerRadius="@dimen/card_radius"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚖️ Peso"
+                        android:textSize="@dimen/text_sm"
+                        android:textColor="@color/text_secondary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvCurrentWeight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="-- kg"
+                        android:textSize="@dimen/text_lg"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+
+                    <TextView
+                        android:id="@+id/tvBmi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Regista o teu peso"
+                        android:textSize="@dimen/text_xs"
+                        android:textColor="@color/text_hint"
+                        android:layout_marginTop="2dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnLogWeight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:text="Registar"
+                        android:textSize="@dimen/text_xs"
+                        style="@style/ButtonOutlined" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- Stats Row: streak + progress nav -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="@dimen/spacing_lg"
+            android:weightSum="2">
+
+            <!-- Streak -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardCornerRadius="@dimen/card_radius"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🏆 Treinos"
+                        android:textSize="@dimen/text_sm"
+                        android:textColor="@color/text_secondary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvStreakCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="@dimen/text_display"
+                        android:textColor="@color/accent"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="concluídos"
+                        android:textSize="@dimen/text_xs"
+                        android:textColor="@color/text_hint" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Go to Progress -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardCornerRadius="@dimen/card_radius"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:id="@+id/btnGoToProgress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📈"
+                        android:textSize="28sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ver Progresso"
+                        android:textSize="@dimen/text_sm"
+                        android:textColor="@color/text_secondary"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

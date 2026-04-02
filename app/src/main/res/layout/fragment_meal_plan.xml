@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Calories summary card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_md"
+            android:layout_marginBottom="0dp"
+            app:cardBackgroundColor="@color/surface_card"
+            app:cardCornerRadius="@dimen/card_radius"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="@dimen/spacing_md"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvTodayKcal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0 kcal hoje"
+                    android:textSize="@dimen/text_md"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔥"
+                    android:textSize="22sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Tab Layout -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:background="@color/surface"
+            app:tabTextColor="@color/text_hint"
+            app:tabSelectedTextColor="@color/primary_variant"
+            app:tabIndicatorColor="@color/primary_variant"
+            app:tabMode="scrollable"
+            style="@style/TabStyle" />
+
+        <!-- Recipes RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvRecipes"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="@dimen/spacing_sm"
+            android:clipToPadding="false" />
+
+        <!-- Meal Log RecyclerView (shown on Registo tab) -->
+        <LinearLayout
+            android:id="@+id/cardMealSummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="@dimen/spacing_md"
+            android:background="@color/surface_card">
+
+            <TextView
+                android:id="@+id/tvBreakfastKcal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pequeno-Almoço: 0 kcal"
+                android:textSize="@dimen/text_sm"
+                android:textColor="@color/breakfast_color" />
+
+            <TextView
+                android:id="@+id/tvLunchKcal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Almoço: 0 kcal"
+                android:textSize="@dimen/text_sm"
+                android:textColor="@color/lunch_color"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/tvDinnerKcal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Jantar: 0 kcal"
+                android:textSize="@dimen/text_sm"
+                android:textColor="@color/dinner_color"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/tvSnackKcal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lanches: 0 kcal"
+                android:textSize="@dimen/text_sm"
+                android:textColor="@color/snack_color"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvMealLog"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="@dimen/spacing_sm"
+            android:clipToPadding="false"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Floating Action Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabLogMeal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@android:drawable/ic_input_add"
+        android:contentDescription="Adicionar Refeição"
+        app:backgroundTint="@color/accent"
+        app:tint="@color/text_on_primary" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

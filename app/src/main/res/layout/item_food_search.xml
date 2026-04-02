@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_md"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvFoodSearchName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Peito de Frango"
+            android:textSize="@dimen/text_sm"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/divider"
+            android:layout_marginHorizontal="8dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvFoodSearchDetails"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="165 kcal/100g | P:31g C:0g G:4g | Continente"
+        android:textSize="@dimen/text_xs"
+        android:textColor="@color/text_hint"
+        android:layout_marginTop="2dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        android:layout_marginTop="@dimen/spacing_sm" />
+</LinearLayout>

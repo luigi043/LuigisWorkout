@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginVertical="4dp"
+    app:cardBackgroundColor="@color/surface_card"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/spacing_md"
+        android:gravity="center_vertical">
+
+        <!-- Checkbox -->
+        <CheckBox
+            android:id="@+id/checkExercise"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/primary_light"
+            android:layout_marginEnd="@dimen/spacing_sm" />
+
+        <!-- Exercise Info -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvExerciseName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Agachamento"
+                android:textSize="@dimen/text_md"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvSetsReps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3 séries × 12 | ⏱ 60seg descanso"
+                android:textSize="@dimen/text_xs"
+                android:textColor="@color/accent"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/tvMuscleGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💪 Pernas"
+                android:textSize="@dimen/text_xs"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/tvExerciseDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pés à largura dos ombros, desce até 90°"
+                android:textSize="@dimen/text_xs"
+                android:textColor="@color/text_hint"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/tvModification"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💡 Modificação: Joelhos no chão"
+                android:textSize="@dimen/text_xs"
+                android:textColor="@color/info"
+                android:layout_marginTop="2dp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
