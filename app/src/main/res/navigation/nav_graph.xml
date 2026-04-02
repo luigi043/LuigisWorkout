@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.luigisworkout.ui.home.HomeFragment"
+        android:label="Início"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/mealPlanFragment"
+        android:name="com.luigisworkout.ui.mealplan.MealPlanFragment"
+        android:label="Refeições"
+        tools:layout="@layout/fragment_meal_plan" />
+
+    <fragment
+        android:id="@+id/workoutFragment"
+        android:name="com.luigisworkout.ui.workout.WorkoutFragment"
+        android:label="Treino"
+        tools:layout="@layout/fragment_workout" />
+
+    <fragment
+        android:id="@+id/progressFragment"
+        android:name="com.luigisworkout.ui.progress.ProgressFragment"
+        android:label="Progresso"
+        tools:layout="@layout/fragment_progress" />
+
+</navigation>

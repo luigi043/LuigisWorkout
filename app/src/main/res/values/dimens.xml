@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spacing -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+
+    <!-- Text sizes -->
+    <dimen name="text_xs">11sp</dimen>
+    <dimen name="text_sm">13sp</dimen>
+    <dimen name="text_md">15sp</dimen>
+    <dimen name="text_lg">18sp</dimen>
+    <dimen name="text_xl">22sp</dimen>
+    <dimen name="text_xxl">28sp</dimen>
+    <dimen name="text_display">36sp</dimen>
+
+    <!-- Card -->
+    <dimen name="card_radius">16dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="card_padding">16dp</dimen>
+
+    <!-- Icon sizes -->
+    <dimen name="icon_sm">20dp</dimen>
+    <dimen name="icon_md">28dp</dimen>
+    <dimen name="icon_lg">40dp</dimen>
+
+    <!-- Progress bar -->
+    <dimen name="progress_height">10dp</dimen>
+    <dimen name="progress_height_thin">6dp</dimen>
+
+    <!-- Bottom navigation height -->
+    <dimen name="bottom_nav_height">64dp</dimen>
+
+    <!-- Toolbar height -->
+    <dimen name="toolbar_height">56dp</dimen>
+
+    <!-- Chart height -->
+    <dimen name="chart_height">200dp</dimen>
+
+    <!-- FAB margin -->
+    <dimen name="fab_margin">16dp</dimen>
+</resources>

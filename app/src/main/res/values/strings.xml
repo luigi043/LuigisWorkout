@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Luigi\'s Workout</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Início</string>
+    <string name="nav_meals">Refeições</string>
+    <string name="nav_workout">Treino</string>
+    <string name="nav_progress">Progresso</string>
+
+    <!-- Home -->
+    <string name="greeting_morning">Bom dia</string>
+    <string name="greeting_afternoon">Boa tarde</string>
+    <string name="greeting_evening">Boa noite</string>
+    <string name="calories_goal">Meta de calorias</string>
+    <string name="water_tracker">Água</string>
+    <string name="log_meal">Registar Refeição</string>
+    <string name="log_weight">Registar Peso</string>
+    <string name="today_workout">Treino de Hoje</string>
+    <string name="workout_completed">Treino Concluído!</string>
+
+    <!-- Meal Plan -->
+    <string name="tab_breakfast">Pequeno-Almoço</string>
+    <string name="tab_lunch">Almoço</string>
+    <string name="tab_dinner">Jantar</string>
+    <string name="tab_snack">Lanche</string>
+    <string name="tab_log">Registo</string>
+    <string name="add_meal">Adicionar Refeição</string>
+    <string name="delete_meal">Eliminar Refeição</string>
+    <string name="confirm_delete">Tem a certeza que quer eliminar?</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete">Eliminar</string>
+    <string name="log_meal_label">Registar Refeição</string>
+
+    <!-- Workout -->
+    <string name="workout_plan">Plano de Treino</string>
+    <string name="week_label">Semana</string>
+    <string name="start_workout">Iniciar Treino</string>
+    <string name="complete_workout">Concluir Treino</string>
+    <string name="calories_burned">kcal queimadas</string>
+    <string name="minutes">min</string>
+
+    <!-- Progress -->
+    <string name="progress_title">Progresso</string>
+    <string name="weight_chart">Evolução do Peso</string>
+    <string name="calories_chart">Calorias Diárias</string>
+    <string name="workouts_completed">Treinos Concluídos</string>
+    <string name="bmi_label">IMC</string>
+
+    <!-- Log Meal -->
+    <string name="food_name_hint">Nome do alimento</string>
+    <string name="calories_hint">Calorias (kcal)</string>
+    <string name="protein_hint">Proteína (g)</string>
+    <string name="carbs_hint">Hidratos (g)</string>
+    <string name="fat_hint">Gordura (g)</string>
+    <string name="quantity_hint">Quantidade</string>
+    <string name="save">Guardar</string>
+    <string name="meal_type_label">Tipo de Refeição</string>
+
+    <!-- Log Weight -->
+    <string name="weight_hint">Peso (kg)</string>
+    <string name="note_hint">Nota (opcional)</string>
+    <string name="save_weight">Guardar Peso</string>
+    <string name="weight_saved">Peso guardado!</string>
+    <string name="weight_invalid">Insere um peso válido (30-300 kg)</string>
+
+    <!-- Notifications -->
+    <string name="notif_breakfast_title">🌅 Hora do Pequeno-Almoço!</string>
+    <string name="notif_breakfast_text">Começa bem o dia com uma refeição nutritiva.</string>
+    <string name="notif_lunch_title">☀️ Hora do Almoço!</string>
+    <string name="notif_lunch_text">Não te esqueças de registar o teu almoço.</string>
+    <string name="notif_dinner_title">🌙 Hora do Jantar!</string>
+    <string name="notif_dinner_text">Termina o dia com uma refeição equilibrada.</string>
+    <string name="notif_workout_title">💪 Hora de Treinar!</string>
+    <string name="notif_workout_text">O teu treino de hoje está à tua espera. Vamos lá!</string>
+</resources>
