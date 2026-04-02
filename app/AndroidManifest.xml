@@ -12,7 +12,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
-        android:name=".LuigisWorkoutApp"
+        android:name="com.luigisworkout.LuigisWorkoutApp"
         android:allowBackup="true"
         android:icon="@drawable/luigis_workout"
         android:label="@string/app_name"
@@ -21,7 +21,7 @@
         android:theme="@style/Theme.LuigisWorkout">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.luigisworkout.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -31,17 +31,16 @@
         </activity>
 
         <activity
-            android:name=".ui.logmeal.LogMealActivity"
+            android:name="com.luigisworkout.ui.logmeal.LogMealActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName="com.luigisworkout.MainActivity"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".ui.logweight.LogWeightActivity"
+            android:name="com.luigisworkout.ui.logweight.LogWeightActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName="com.luigisworkout.MainActivity" />
 
-        <!-- WorkManager provider -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
@@ -52,11 +51,9 @@
                 android:value="androidx.startup" />
         </provider>
 
-        <!-- Notification channels -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="luigi_workout_channel" />
 
     </application>
-
 </manifest>
