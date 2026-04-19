@@ -33,26 +33,26 @@ class DailyNotificationWorker(
     private fun sendNotification(type: String) {
         val (title, message, channelId, notifId) = when (type) {
             TYPE_BREAKFAST -> NotifData(
-                "🌅 Hora do Pequeno-Almoço!",
-                "Começa bem o dia com uma refeição nutritiva.",
+                applicationContext.getString(R.string.notif_breakfast_title),
+                applicationContext.getString(R.string.notif_breakfast_text),
                 LuigisWorkoutApp.MEAL_CHANNEL_ID,
                 1001
             )
             TYPE_LUNCH -> NotifData(
-                "☀️ Hora do Almoço!",
-                "Não te esqueças de registar o teu almoço.",
+                applicationContext.getString(R.string.notif_lunch_title),
+                applicationContext.getString(R.string.notif_lunch_text),
                 LuigisWorkoutApp.MEAL_CHANNEL_ID,
                 1002
             )
             TYPE_DINNER -> NotifData(
-                "🌙 Hora do Jantar!",
-                "Termina o dia com uma refeição equilibrada.",
+                applicationContext.getString(R.string.notif_dinner_title),
+                applicationContext.getString(R.string.notif_dinner_text),
                 LuigisWorkoutApp.MEAL_CHANNEL_ID,
                 1003
             )
             TYPE_WORKOUT -> NotifData(
-                "💪 Hora de Treinar!",
-                "O teu treino de hoje está à tua espera. Vamos lá!",
+                applicationContext.getString(R.string.notif_workout_title),
+                applicationContext.getString(R.string.notif_workout_text),
                 LuigisWorkoutApp.WORKOUT_CHANNEL_ID,
                 1004
             )

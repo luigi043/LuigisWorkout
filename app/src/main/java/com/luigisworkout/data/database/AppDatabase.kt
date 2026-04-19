@@ -16,7 +16,7 @@ import com.luigisworkout.data.database.entities.*
         DailyGoal::class,
         ShoppingItem::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

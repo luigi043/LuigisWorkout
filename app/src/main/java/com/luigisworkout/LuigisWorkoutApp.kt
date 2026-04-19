@@ -29,26 +29,26 @@ class LuigisWorkoutApp : Application() {
 
             val mealChannel = NotificationChannel(
                 MEAL_CHANNEL_ID,
-                "Lembretes de Refeições",
+                "Meal Reminders",
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Lembretes diários para registar refeições e atingir os teus objetivos"
+                description = "Daily reminders to log your meals and hit your goals"
             }
 
             val workoutChannel = NotificationChannel(
                 WORKOUT_CHANNEL_ID,
-                "Lembretes de Treino",
+                "Workout Reminders",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Lembretes diários do teu plano de treino em casa"
+                description = "Daily reminders for your home workout plan"
             }
 
             val generalChannel = NotificationChannel(
                 GENERAL_CHANNEL_ID,
-                "Geral",
+                "General",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Notificações gerais do Luigi's Workout"
+                description = "General notifications for Luigi's Workout"
             }
 
             nm.createNotificationChannels(listOf(mealChannel, workoutChannel, generalChannel))

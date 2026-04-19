@@ -303,10 +303,21 @@ class ExerciseAdapter(
         }
         
         holder.btnProgress.setOnClickListener {
+            val progressMessage = if (ex.setsHistory.isEmpty()) {
+                "No history recorded for this exercise yet. Complete workouts to see your progress!"
+            } else {
+                buildString {
+                    appendLine("Recent performance:")
+                    ex.setsHistory.takeLast(5).forEach { record ->
+                        appendLine("• $record")
+                    }
+                }
+            }
+
             MaterialAlertDialogBuilder(holder.itemView.context)
-                .setTitle(holder.itemView.context.getString(R.string.track_progress_title, ex.name))
-                .setMessage(R.string.track_progress_msg)
-                .setPositiveButton(R.string.ok, null)
+                .setTitle("Progress: ${ex.name}")
+                .setMessage(progressMessage)
+                .setPositiveButton("Got it", null)
                 .show()
         }
     }

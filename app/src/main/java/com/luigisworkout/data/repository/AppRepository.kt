@@ -77,7 +77,7 @@ class AppRepository(context: Context) {
     fun getAllWorkouts(): LiveData<List<WorkoutLog>> = workoutLogDao.getAll()
     fun getTodayWorkout(): LiveData<WorkoutLog?> = workoutLogDao.getByDateLive(today())
     fun getCompletedWorkoutsCount(): LiveData<Int> = workoutLogDao.getCompletedCount()
-    fun getRecentWeekWorkouts(): LiveData<List<WorkoutLog>> = workoutLogDao.getRecentWeek()
+    fun getRecentWeekWorkouts(): LiveData<List<WorkoutLog>> = workoutLogDao.getRecentHeatmap(dateXDaysAgo(28))
 
     suspend fun getTotalCaloriesBurned(): Int = withContext(Dispatchers.IO) {
         workoutLogDao.getTotalCaloriesBurned(dateXDaysAgo(30)) ?: 0

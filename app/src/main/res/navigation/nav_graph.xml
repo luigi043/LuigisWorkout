@@ -14,7 +14,7 @@
     <fragment
         android:id="@+id/mealPlanFragment"
         android:name="com.luigisworkout.ui.mealplan.MealPlanFragment"
-        android:label="Refeições"
+        android:label="Meals"
         tools:layout="@layout/fragment_meal_plan" />
 
     <fragment

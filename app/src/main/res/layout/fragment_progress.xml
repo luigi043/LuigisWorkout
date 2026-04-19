@@ -46,7 +46,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Treinos"
+                        android:text="@string/workouts_label"
                         android:textSize="@dimen/text_xs"
                         android:textColor="@color/text_hint"
                         android:gravity="center" />
@@ -80,7 +80,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Semanas"
+                        android:text="@string/weeks_label"
                         android:textSize="@dimen/text_xs"
                         android:textColor="@color/text_hint"
                         android:gravity="center" />
@@ -113,7 +113,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🔥 Queimadas (30d)"
+                        android:text="@string/burned_30d"
                         android:textSize="@dimen/text_xs"
                         android:textColor="@color/text_hint"
                         android:gravity="center" />
@@ -139,7 +139,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⚖️ Evolução do Peso"
+                    android:text="@string/weight_chart"
                     android:textSize="@dimen/text_md"
                     android:textColor="@color/text_primary"
                     android:textStyle="bold"
@@ -168,7 +168,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Peso atual"
+                            android:text="@string/current_weight_label"
                             android:textSize="@dimen/text_xs"
                             android:textColor="@color/text_hint" />
                     </LinearLayout>
@@ -189,7 +189,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Variação (30d)"
+                            android:text="@string/variation_30d"
                             android:textSize="@dimen/text_xs"
                             android:textColor="@color/text_hint" />
                     </LinearLayout>
@@ -211,7 +211,7 @@
                             android:id="@+id/tvBmiCategory"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="IMC"
+                            android:text="@string/bmi_label"
                             android:textSize="@dimen/text_xs"
                             android:textColor="@color/text_hint" />
                     </LinearLayout>
@@ -228,7 +228,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Peso inicial:"
+                        android:text="@string/start_weight_label"
                         android:textSize="@dimen/text_xs"
                         android:textColor="@color/text_secondary" />
 
@@ -236,7 +236,7 @@
                         android:id="@+id/tvStartWeight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Não definido"
+                        android:text="@string/not_defined"
                         android:textSize="@dimen/text_xs"
                         android:textColor="@color/text_primary" />
 
@@ -246,7 +246,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Objetivo:"
+                        android:text="@string/goal_weight_label"
                         android:textSize="@dimen/text_xs"
                         android:textColor="@color/text_secondary" />
 
@@ -254,7 +254,7 @@
                         android:id="@+id/tvGoalWeight"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Não definido"
+                        android:text="@string/not_defined"
                         android:textSize="@dimen/text_xs"
                         android:textColor="@color/text_primary" />
                 </LinearLayout>
@@ -264,7 +264,7 @@
                     android:id="@+id/tvNoWeightData"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Sem dados de peso. Regista o teu primeiro peso!"
+                    android:text="@string/no_weight_data"
                     android:textSize="@dimen/text_sm"
                     android:textColor="@color/text_hint"
                     android:padding="@dimen/spacing_md"
@@ -282,7 +282,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_sm"
-                    android:text="⚖️ Registar Peso"
+                    android:text="@string/log_weight"
                     style="@style/ButtonPrimary" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -305,7 +305,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🔥 Calorias Diárias (30d)"
+                    android:text="@string/calories_chart"
                     android:textSize="@dimen/text_md"
                     android:textColor="@color/text_primary"
                     android:textStyle="bold"
@@ -315,7 +315,7 @@
                     android:id="@+id/tvNoCalorieData"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Sem dados de calorias. Começa a registar as tuas refeições!"
+                    android:text="@string/no_calorie_data"
                     android:textSize="@dimen/text_sm"
                     android:textColor="@color/text_hint"
                     android:padding="@dimen/spacing_md"
@@ -347,7 +347,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📋 Histórico de Peso"
+                    android:text="@string/weight_history_label"
                     android:textSize="@dimen/text_md"
                     android:textColor="@color/text_primary"
                     android:textStyle="bold"

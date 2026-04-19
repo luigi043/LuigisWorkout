@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:padding="16dp"
-                android:text="Papas de Aveia"
+                android:text="Recipe Name"
                 android:textSize="20sp"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"

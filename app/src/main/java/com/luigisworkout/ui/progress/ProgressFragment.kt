@@ -113,8 +113,8 @@ class ProgressFragment : Fragment() {
 
         viewModel.userProfile.observe(viewLifecycleOwner) { profile ->
             profile?.let {
-                binding.tvGoalWeight.text = if (it.goalWeightKg > 0) "${it.goalWeightKg} kg" else "Não definido"
-                binding.tvStartWeight.text = if (it.startWeightKg > 0) "${it.startWeightKg} kg" else "Não definido"
+                binding.tvGoalWeight.text = if (it.goalWeightKg > 0) "${it.goalWeightKg} kg" else getString(R.string.not_defined)
+                binding.tvStartWeight.text = if (it.startWeightKg > 0) "${it.startWeightKg} kg" else getString(R.string.not_defined)
             }
         }
     }

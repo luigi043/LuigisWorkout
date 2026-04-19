@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
@@ -11,60 +12,29 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.google.android.material.card.MaterialCardView
+        <!-- Header -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/spacing_md"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp">
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_md">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/spacing_md">
+                android:text="Lista de Compras"
+                android:textSize="@dimen/text_xl"
+                android:textColor="@color/primary"
+                android:textStyle="bold" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/add_item_label"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_hint"
-                    android:letterSpacing="0.1" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center_vertical">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilItemName"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/add_item_hint"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etItemName"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textCapSentences" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAddItem"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="+"
-                        android:textSize="20sp"
-                        app:cornerRadius="12dp" />
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            <TextView
+                android:id="@+id/tvItemsCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="4 itens para comprar"
+                android:textSize="@dimen/text_sm"
+                android:textColor="@color/text_secondary" />
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvShoppingList"
@@ -72,16 +42,77 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:paddingHorizontal="@dimen/spacing_sm"
-            android:clipToPadding="false" />
+            android:clipToPadding="false"
+            android:paddingBottom="100dp"
+            tools:listitem="@layout/item_shopping" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnClearChecked"
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardAddItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="@dimen/spacing_md"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="12dp"
+        app:cardBackgroundColor="@color/surface_card"
+        app:strokeWidth="1dp"
+        app:strokeColor="@color/surface_variant">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/spacing_md"
-            android:text="@string/clear_checked"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:textColor="@color/error" />
-    </LinearLayout>
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilItemName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Adicionar novo item..."
+                app:hintTextColor="@color/text_hint"
+                app:placeholderText="ex: Frango"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etItemName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences"
+                    android:textColor="@color/text_primary"
+                    android:background="@android:color/transparent" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddItem"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:icon="@drawable/ic_add"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:cornerRadius="24dp"
+                android:padding="0dp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnClearChecked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="@dimen/spacing_md"
+        android:text="Limpar concluídos"
+        android:textSize="10sp"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:textColor="@color/error" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

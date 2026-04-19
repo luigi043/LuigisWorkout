@@ -53,6 +53,12 @@ class ShoppingListFragment : Fragment() {
     private fun setupObservers() {
         viewModel.shoppingItems.observe(viewLifecycleOwner) { items ->
             adapter.submitList(items)
+            val pendingCount = items.count { !it.isChecked }
+            binding.tvItemsCount.text = if (pendingCount == 1) {
+                "1 item para comprar"
+            } else {
+                "$pendingCount itens para comprar"
+            }
         }
     }
 

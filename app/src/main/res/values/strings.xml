@@ -9,10 +9,13 @@
     <string name="nav_progress">Progress</string>
 
     <!-- Home -->
-    <string name="greeting_morning">Good morning</string>
-    <string name="greeting_afternoon">Good afternoon</string>
-    <string name="greeting_evening">Good evening</string>
+    <string name="greeting_morning">Good Morning, Luigi! ⚡</string>
+    <string name="greeting_afternoon">Good Afternoon, Luigi! ⚡</string>
+    <string name="greeting_evening">Good Evening, Luigi! ⚡</string>
+    <string name="nutrition_summary">Nutrition Summary</string>
+    <string name="activity_calendar">Activity Calendar</string>
     <string name="calories_goal">Calories Goal</string>
+    <string name="calories_remaining_format">%1$d kcal left</string>
     <string name="water_tracker">Water</string>
     <string name="log_meal">Log Meal</string>
     <string name="log_weight">Log Weight</string>
@@ -79,12 +82,38 @@
 
     <!-- Progress -->
     <string name="progress_title">Progress</string>
-    <string name="weight_chart">Weight Evolution</string>
-    <string name="calories_chart">Daily Calories</string>
+    <string name="weight_chart">⚖️ Weight Evolution</string>
+    <string name="calories_chart">🔥 Daily Calories (30d)</string>
     <string name="workouts_completed">Workouts Completed</string>
     <string name="bmi_label">BMI</string>
+    <string name="workouts_label">Workouts</string>
+    <string name="weeks_label">Weeks</string>
+    <string name="burned_30d">🔥 Burned (30d)</string>
+    <string name="current_weight_label">Current weight</string>
+    <string name="variation_30d">Variation (30d)</string>
+    <string name="start_weight_label">Start weight:</string>
+    <string name="goal_weight_label">Goal weight:</string>
+    <string name="not_defined">Not defined</string>
+    <string name="no_weight_data">No weight data yet. Log your weight to see progress!</string>
+    <string name="no_calorie_data">No calorie data yet. Log your meals to see progress!</string>
+    <string name="weight_history_label">📋 Weight History</string>
 
-    <!-- Log Meal -->
+    <!-- Additional Home Strings -->
+    <string name="workout_done">Workout Done! ✅</string>
+    <string name="burned_today_format">You burned %1$d kcal today</string>
+    <string name="ready_to_train">Ready to train?</string>
+    <string name="check_daily_plan">Check your daily workout plan</string>
+    <string name="meal_saved">✅ Meal saved!</string>
+    <string name="enter_food_name">Enter food name</string>
+    <string name="enter_calories">Enter calories</string>
+
+    <!-- Meal Plan Tabs -->
+    <string name="tab_history_label">History</string>
+    <string name="add_to_diary">ADD TO DIARY</string>
+    <string name="close">CLOSE</string>
+    <string name="delete_entry_title">Delete Entry</string>
+    <string name="confirm_delete_meal_msg">Are you sure you want to remove \'%s\'?</string>
+
     <string name="food_name_hint">Food name</string>
     <string name="calories_hint">Calories (kcal)</string>
     <string name="protein_hint">Protein (g)</string>

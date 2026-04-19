@@ -32,7 +32,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Refeição:"
+                    android:text="@string/meal_type_label"
                     android:textSize="@dimen/text_sm"
                     android:textColor="@color/text_secondary"
                     android:layout_marginEnd="12dp" />
@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_sm"
-            android:hint="Nome do Alimento"
+            android:hint="@string/food_name_hint"
             style="@style/TextInputStyle">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -76,7 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_sm"
-            android:hint="Calorias (kcal)"
+            android:hint="@string/calories_hint"
             style="@style/TextInputStyle">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -100,7 +100,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="4dp"
-                android:hint="Proteína (g)"
+                android:hint="@string/protein_hint"
                 style="@style/TextInputStyle">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etProtein"
@@ -116,7 +116,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
                 android:layout_marginEnd="4dp"
-                android:hint="Hidratos (g)"
+                android:hint="@string/carbs_hint"
                 style="@style/TextInputStyle">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etCarbs"
@@ -131,7 +131,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
-                android:hint="Gordura (g)"
+                android:hint="@string/fat_hint"
                 style="@style/TextInputStyle">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etFat"
@@ -147,7 +147,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_lg"
-            android:hint="Quantidade (porções)"
+            android:hint="@string/quantity_hint"
             style="@style/TextInputStyle">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -164,7 +164,7 @@
             android:id="@+id/btnSaveMeal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="✅ Guardar Refeição"
+            android:text="@string/save"
             android:textSize="@dimen/text_md"
             style="@style/ButtonAccent" />
 

@@ -125,11 +125,11 @@ class LogMealActivity : AppCompatActivity() {
             val quantity = binding.etQuantity.text.toString().toFloatOrNull() ?: 1f
 
             if (name.isEmpty()) {
-                binding.etFoodName.error = "Enter food name"
+                binding.etFoodName.error = getString(R.string.enter_food_name)
                 return@setOnClickListener
             }
             if (calories == 0) {
-                binding.etCalories.error = "Enter calories"
+                binding.etCalories.error = getString(R.string.enter_calories)
                 return@setOnClickListener
             }
 
@@ -159,7 +159,7 @@ class LogMealActivity : AppCompatActivity() {
     private fun setupObservers() {
         viewModel.saved.observe(this) { saved ->
             if (saved) {
-                Toast.makeText(this, "✅ Meal saved!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.meal_saved), Toast.LENGTH_SHORT).show()
                 finish()
             }
         }

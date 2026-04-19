@@ -110,8 +110,8 @@ interface WorkoutLogDao {
     @Query("SELECT SUM(caloriesBurned) FROM workout_logs WHERE date >= :startDate")
     suspend fun getTotalCaloriesBurned(startDate: String): Int?
 
-    @Query("SELECT * FROM workout_logs ORDER BY date DESC LIMIT 7")
-    fun getRecentWeek(): LiveData<List<WorkoutLog>>
+    @Query("SELECT * FROM workout_logs WHERE date >= :startDate ORDER BY date ASC")
+    fun getRecentHeatmap(startDate: String): LiveData<List<WorkoutLog>>
 }
 
 // ─── USER PROFILE DAO ──────────────────────────────────────────────────────────

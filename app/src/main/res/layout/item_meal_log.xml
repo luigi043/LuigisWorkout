@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -18,7 +19,7 @@
             android:id="@+id/tvFoodName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Frango Grelhado"
+            tools:text="Grilled Chicken"
             android:textSize="@dimen/text_sm"
             android:textColor="@color/text_primary"
             android:textStyle="bold" />
@@ -33,7 +34,7 @@
                 android:id="@+id/tvMealType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="☀️ Almoço"
+                tools:text="Lunch"
                 android:textSize="@dimen/text_xs"
                 android:textColor="@color/lunch_color" />
 

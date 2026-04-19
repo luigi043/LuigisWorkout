@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.view.*
 import android.view.animation.AnimationUtils
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,15 +14,12 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.luigisworkout.R
-import com.luigisworkout.data.AppContent
 import com.luigisworkout.data.Recipe
 import com.luigisworkout.data.database.entities.MealLog
 import com.luigisworkout.databinding.FragmentMealPlanBinding
 import com.luigisworkout.ui.logmeal.LogMealActivity
 import com.luigisworkout.viewmodel.AppViewModelFactory
 import com.luigisworkout.viewmodel.MealPlanViewModel
-import java.text.SimpleDateFormat
-import java.util.*
 
 class MealPlanFragment : Fragment() {
 
@@ -54,7 +51,13 @@ class MealPlanFragment : Fragment() {
     }
 
     private fun setupTabs() {
-        val tabs = listOf("Breakfast", "Lunch", "Dinner", "Snacks", "History")
+        val tabs = listOf(
+            getString(R.string.tab_breakfast),
+            getString(R.string.tab_lunch),
+            getString(R.string.tab_dinner),
+            getString(R.string.tab_snack),
+            getString(R.string.tab_history_label)
+        )
         tabs.forEach { title ->
             binding.tabLayout.addTab(binding.tabLayout.newTab().setText(title))
         }
@@ -130,7 +133,12 @@ class MealPlanFragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(recipe.name)
             .setMessage(message)
-            .setPositiveButton("ADD TO DIARY") { _, _ ->
+            .setPositiveButton(R.string.add_to_diary) { _, _ ->
+                // Add ingredients to shopping list
+                recipe.ingredients.forEach { ingredient ->
+                    viewModel.addShoppingItem(ingredient, supermarket = recipe.supermarket)
+                }
+
                 val intent = Intent(requireContext(), LogMealActivity::class.java).apply {
                     putExtra("food_name", recipe.name)
                     putExtra("calories", recipe.calories)
@@ -141,16 +149,16 @@ class MealPlanFragment : Fragment() {
                 }
                 startActivity(intent)
             }
-            .setNegativeButton("CLOSE", null)
+            .setNegativeButton(R.string.close, null)
             .show()
     }
 
     private fun confirmDeleteMeal(meal: MealLog) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Delete Entry")
-            .setMessage("Are you sure you want to remove '${meal.foodName}'?")
-            .setPositiveButton("DELETE") { _, _ -> viewModel.deleteMeal(meal) }
-            .setNegativeButton("CANCEL", null)
+            .setTitle(R.string.delete_entry_title)
+            .setMessage(getString(R.string.confirm_delete_meal_msg, meal.foodName))
+            .setPositiveButton(R.string.delete) { _, _ -> viewModel.deleteMeal(meal) }
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -165,7 +173,7 @@ class MealPlanFragment : Fragment() {
         }
 
         binding.btnGoToShopping.setOnClickListener {
-            androidx.navigation.fragment.findNavController().navigate(R.id.shoppingListFragment)
+            findNavController().navigate(R.id.shoppingListFragment)
         }
     }
 
@@ -188,7 +196,7 @@ class RecipeAdapter(
         notifyDataSetChanged()
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvName: TextView = view.findViewById(R.id.tvRecipeName)
         val tvCalories: TextView = view.findViewById(R.id.tvRecipeCalories)
         val tvTime: TextView = view.findViewById(R.id.tvRecipeTime)
@@ -237,7 +245,7 @@ class MealLogAdapter(
         notifyDataSetChanged()
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvFood: TextView = view.findViewById(R.id.tvFoodName)
         val tvCalories: TextView = view.findViewById(R.id.tvMealCalories)
         val tvType: TextView = view.findViewById(R.id.tvMealType)
@@ -254,7 +262,13 @@ class MealLogAdapter(
         val meal = meals[position]
         holder.tvFood.text = meal.foodName
         holder.tvCalories.text = "${meal.calories} kcal"
-        holder.tvType.text = meal.mealType.uppercase()
+        holder.tvType.text = when(meal.mealType.lowercase()) {
+            "breakfast" -> "🌅 " + holder.itemView.context.getString(R.string.tab_breakfast)
+            "lunch" -> "☀️ " + holder.itemView.context.getString(R.string.tab_lunch)
+            "dinner" -> "🌙 " + holder.itemView.context.getString(R.string.tab_dinner)
+            "snack" -> "🍎 " + holder.itemView.context.getString(R.string.tab_snack)
+            else -> meal.mealType.uppercase()
+        }
         holder.tvMacros.text = "P: ${meal.protein.toInt()}g | C: ${meal.carbs.toInt()}g | F: ${meal.fat.toInt()}g"
         holder.btnDelete.setOnClickListener { onDelete(meal) }
     }

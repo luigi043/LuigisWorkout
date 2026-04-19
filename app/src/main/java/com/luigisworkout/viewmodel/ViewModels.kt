@@ -85,6 +85,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val todayGoal = repository.getTodayGoal()
     val completedWorkouts = repository.getCompletedWorkoutsCount()
     val todayWorkout = repository.getTodayWorkout()
+    val recentWeekWorkouts = repository.getRecentWeekWorkouts()
 
     private val _macros = MutableLiveData<Triple<Float, Float, Float>>()
     val macros: LiveData<Triple<Float, Float, Float>> = _macros
