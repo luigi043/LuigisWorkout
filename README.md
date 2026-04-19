@@ -12,30 +12,33 @@
 ## ✨ Features
 
 ### 🥗 Calorie & Meal Tracking
-- **Daily Food Log:** Track every meal (Pequeno-Almoço, Almoço, Jantar, Lanches) with a focus on macro-nutrients.
-- **Local Portuguese Focus:** Integrated database with products from **Continente, Pingo Doce, and Lidl**.
-- **Healthy Recipes:** A curated list of quick, high-protein recipes.
+- **Daily Food Log:** Track every meal (Breakfast, Lunch, Dinner, Snacks) with detailed macro-nutrients (Protein, Carbs, Fats).
+- **Local Portuguese Focus:** Integrated database with products and pricing from **Continente, Pingo Doce, and Lidl**.
+- **Smart Recipes:** Curated list of high-protein, budget-friendly recipes with step-by-step instructions.
 - **Water Tracker:** Stay hydrated with a daily progress indicator.
 
 ### 🏠 Home Workout Plans
-- **12-Week Progressive Plan:** From beginner to advanced, requiring zero equipment.
-- **Interactive Timer:** Built-in workout timer with pause/resume functionality.
-- **Daily Reminders:** Morning/afternoon notifications to keep you on track.
+- **Progressive Training:** Structured workout days (Leg Day, Upper Body Push, HIIT) designed for home environments.
+- **Exercise Library:** Detailed instructions for each movement including difficulty levels and target muscle groups.
+- **Interactive Timer:** Built-in workout timer to manage rest periods and sets.
+- **Daily Reminders:** Local notifications via WorkManager to maintain your routine.
 
 ### 📈 Progress Insights
-- **Weight Tracking:** Log your weight and monitor BMI changes over time.
-- **Visual Analytics:** Interactive charts (MPAndroidChart) for weight and daily calorie trends.
-- **Streaks:** Gamification to encourage daily consistency.
+- **Weight Tracking:** Log daily weight and monitor BMI changes.
+- **Visual Analytics:** Interactive charts using **MPAndroidChart** for weight trends and calorie consumption.
+- **Motivation:** Dynamic motivational tips to keep you inspired every day.
 
 ---
 
 ## 🛠 Tech Stack
 
+- **Language:** Kotlin + Coroutines (Asynchronous programming).
 - **UI Framework:** XML with ViewBinding (Material Components 3).
-- **Architecture:** MVVM (Model-View-ViewModel) for clean separation of concerns.
+- **Architecture:** MVVM (Model-View-ViewModel) with LiveData.
 - **Database:** Room (SQLite) for 100% offline functionality.
-- **Background Tasks:** WorkManager for reliable daily notifications and scheduling.
-- **Dependency Injection:** Dagger Hilt (planned/prepared) / ViewModel Factory.
+- **Navigation:** Jetpack Navigation Component.
+- **Background Tasks:** WorkManager for reliable daily notifications.
+- **JSON Handling:** Gson for data serialization.
 - **Charts:** MPAndroidChart for visual progress tracking.
 
 ---
@@ -45,12 +48,14 @@
 ```text
 LuigisWorkout/
 ├── app/
-│   ├── src/main/java/.../data/          # Entities, DAOs, Repository
-│   ├── src/main/java/.../ui/            # Fragments and Activities
-│   ├── src/main/java/.../viewmodel/     # Business logic and state
-│   └── src/main/res/layout/             # XML UI Layouts
-├── gradle/                              # Build configuration
-└── build.gradle                         # Root project build file
+│   ├── src/main/java/.../
+│   │   ├── data/           # Models (Recipe, Exercise), Room DB, AppContent
+│   │   ├── ui/             # Fragments (Home, Workout, MealPlan, Progress)
+│   │   ├── viewmodel/      # ViewModel logic and State management
+│   │   ├── notifications/  # WorkManager and Notification logic
+│   │   └── utils/          # Extensions and helper classes
+│   └── src/main/res/       # Layouts, Nav Graph, and Drawables
+└── build.gradle            # Project dependencies (Room, Navigation, etc.)
 ```
 
 ---

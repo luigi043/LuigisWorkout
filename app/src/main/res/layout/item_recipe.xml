@@ -4,85 +4,141 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/spacing_sm"
-    android:layout_marginVertical="4dp"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="8dp"
     android:foreground="?android:attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
     app:cardBackgroundColor="@color/surface_card"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp">
+    app:cardCornerRadius="24dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/spacing_md">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <!-- Recipe Image Placeholder/Header -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:layout_height="120dp"
+            android:background="@color/surface_variant">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/overlay_dark"
+                android:alpha="0.3" />
 
             <TextView
                 android:id="@+id/tvRecipeName"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_gravity="bottom"
+                android:padding="16dp"
                 android:text="Papas de Aveia"
-                android:textSize="@dimen/text_md"
+                android:textSize="20sp"
                 android:textColor="@color/text_primary"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvRecipeCalories"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="340 kcal"
-                android:textSize="@dimen/text_sm"
-                android:textColor="@color/accent"
-                android:textStyle="bold" />
-        </LinearLayout>
+                android:textStyle="bold"
+                android:shadowColor="#80000000"
+                android:shadowDx="2"
+                android:shadowDy="2"
+                android:shadowRadius="4" />
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="4dp"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <TextView
-                android:id="@+id/tvRecipeTime"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="⏱ 5 min"
-                android:textSize="@dimen/text_xs"
-                android:textColor="@color/text_secondary" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/tvSupermarket"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/tvRecipeCalories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="340 kcal"
+                    android:textSize="14sp"
+                    android:textColor="@color/primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" • "
+                    android:textColor="@color/text_hint" />
+
+                <TextView
+                    android:id="@+id/tvRecipeTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⏱ 5 min"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary" />
+
+                <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tvSupermarket"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🛒 Lidl"
+                    android:textSize="10sp"
+                    android:textColor="@color/text_hint"
+                    android:textAllCaps="true"
+                    android:letterSpacing="0.05" />
+            </LinearLayout>
+
+            <!-- Macros Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🛒 Continente"
-                android:textSize="@dimen/text_xs"
-                android:textColor="@color/text_secondary"
-                android:layout_marginStart="12dp" />
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical">
 
-            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipProtein"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="12g P"
+                    android:textSize="10sp"
+                    android:textColor="@color/protein_color"
+                    app:chipBackgroundColor="#15FF5252"
+                    app:chipStrokeWidth="0dp"
+                    app:chipMinHeight="24dp"
+                    style="@style/ChipStyle" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipProtein"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="12g prot"
-                android:textSize="@dimen/text_xs"
-                android:textColor="@color/protein_color"
-                app:chipBackgroundColor="@color/surface_variant"
-                app:chipStrokeWidth="1dp"
-                app:chipStrokeColor="@color/protein_color"
-                app:chipMinHeight="24dp"
-                style="@style/ChipStyle" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipCarbs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:text="58g C"
+                    android:textSize="10sp"
+                    android:textColor="@color/carbs_color"
+                    app:chipBackgroundColor="#15FFAB40"
+                    app:chipStrokeWidth="0dp"
+                    style="@style/ChipStyle" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipFat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:text="6g F"
+                    android:textSize="10sp"
+                    android:textColor="@color/fat_color"
+                    app:chipBackgroundColor="#1540C4FF"
+                    app:chipStrokeWidth="0dp"
+                    style="@style/ChipStyle" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -40,7 +40,7 @@ class LogMealActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "Registar Refeição"
+        supportActionBar?.title = getString(R.string.log_meal_label)
 
         // Pre-fill from recipe intent extras
         intent.extras?.let { extras ->
@@ -73,7 +73,12 @@ class LogMealActivity : AppCompatActivity() {
     }
 
     private fun setupMealTypeSpinner() {
-        val types = listOf("🌅 Pequeno-Almoço", "☀️ Almoço", "🌙 Jantar", "🍎 Lanche")
+        val types = listOf(
+            "🌅 ${getString(R.string.tab_breakfast)}",
+            "☀️ ${getString(R.string.tab_lunch)}",
+            "🌙 ${getString(R.string.tab_dinner)}",
+            "🍎 ${getString(R.string.tab_snack)}"
+        )
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, types)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerMealType.adapter = adapter
@@ -120,11 +125,11 @@ class LogMealActivity : AppCompatActivity() {
             val quantity = binding.etQuantity.text.toString().toFloatOrNull() ?: 1f
 
             if (name.isEmpty()) {
-                binding.etFoodName.error = "Insere o nome do alimento"
+                binding.etFoodName.error = "Enter food name"
                 return@setOnClickListener
             }
             if (calories == 0) {
-                binding.etCalories.error = "Insere as calorias"
+                binding.etCalories.error = "Enter calories"
                 return@setOnClickListener
             }
 
@@ -154,7 +159,7 @@ class LogMealActivity : AppCompatActivity() {
     private fun setupObservers() {
         viewModel.saved.observe(this) { saved ->
             if (saved) {
-                Toast.makeText(this, "✅ Refeição guardada!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "✅ Meal saved!", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }
@@ -192,7 +197,7 @@ class FoodSearchAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val food = items[position]
         holder.tvName.text = food.name
-        holder.tvDetails.text = "${food.calories} kcal/${food.unit} | P:${food.protein.toInt()}g C:${food.carbs.toInt()}g G:${food.fat.toInt()}g | ${food.supermarket}"
+        holder.tvDetails.text = "${food.calories} kcal/${food.unit} | P:${food.protein.toInt()}g C:${food.carbs.toInt()}g F:${food.fat.toInt()}g | ${food.supermarket}"
         holder.itemView.setOnClickListener { onFoodClick(food) }
     }
 

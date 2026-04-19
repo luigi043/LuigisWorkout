@@ -3,6 +3,7 @@ package com.luigisworkout.ui.mealplan
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import android.view.animation.AnimationUtils
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -47,10 +48,13 @@ class MealPlanFragment : Fragment() {
         setupRecyclerViews()
         setupObservers()
         setupClickListeners()
+        
+        // Entrance Animation
+        binding.rvRecipes.layoutAnimation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_animation_fall_down)
     }
 
     private fun setupTabs() {
-        val tabs = listOf("🌅 Pequeno-Almoço", "☀️ Almoço", "🌙 Jantar", "🍎 Lanche", "📋 Registo")
+        val tabs = listOf("Breakfast", "Lunch", "Dinner", "Snacks", "History")
         tabs.forEach { title ->
             binding.tabLayout.addTab(binding.tabLayout.newTab().setText(title))
         }
@@ -59,6 +63,7 @@ class MealPlanFragment : Fragment() {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 currentTab = tab?.position ?: 0
                 updateContent()
+                binding.rvRecipes.scheduleLayoutAnimation()
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
@@ -78,11 +83,14 @@ class MealPlanFragment : Fragment() {
     private fun setupObservers() {
         viewModel.todayMeals.observe(viewLifecycleOwner) { meals ->
             mealLogAdapter.submitList(meals)
-            updateCalorieSummary(meals)
         }
 
         viewModel.todayCalories.observe(viewLifecycleOwner) { calories ->
-            binding.tvTodayKcal.text = "${calories ?: 0} kcal hoje"
+            binding.tvTodayKcal.text = "${calories ?: 0} kcal"
+            // Simple animation for the number
+            binding.tvTodayKcal.animate().scaleX(1.1f).scaleY(1.1f).setDuration(200).withEndAction {
+                binding.tvTodayKcal.animate().scaleX(1f).scaleY(1f).setDuration(200).start()
+            }.start()
         }
 
         updateContent()
@@ -91,8 +99,7 @@ class MealPlanFragment : Fragment() {
     private fun updateContent() {
         val showRecipes = currentTab < 4
         binding.rvRecipes.visibility = if (showRecipes) View.VISIBLE else View.GONE
-        binding.rvMealLog.visibility = if (!showRecipes) View.VISIBLE else View.GONE
-        binding.cardMealSummary.visibility = if (!showRecipes) View.VISIBLE else View.GONE
+        binding.historyContainer.visibility = if (!showRecipes) View.VISIBLE else View.GONE
 
         if (showRecipes) {
             val recipes = when (currentTab) {
@@ -106,30 +113,24 @@ class MealPlanFragment : Fragment() {
         }
     }
 
-    private fun updateCalorieSummary(meals: List<MealLog>) {
-        val byType = meals.groupBy { it.mealType }
-        binding.tvBreakfastKcal.text = "Pequeno-Almoço: ${byType["breakfast"]?.sumOf { it.calories } ?: 0} kcal"
-        binding.tvLunchKcal.text = "Almoço: ${byType["lunch"]?.sumOf { it.calories } ?: 0} kcal"
-        binding.tvDinnerKcal.text = "Jantar: ${byType["dinner"]?.sumOf { it.calories } ?: 0} kcal"
-        binding.tvSnackKcal.text = "Lanches: ${byType["snack"]?.sumOf { it.calories } ?: 0} kcal"
-    }
-
     private fun showRecipeDetail(recipe: Recipe) {
         val message = buildString {
-            appendLine("🔥 ${recipe.calories} kcal  |  💪 ${recipe.protein.toInt()}g prot")
-            appendLine("⏱ ${recipe.prepMinutes} min  |  🛒 ${recipe.supermarket}")
+            appendLine("🔥 ${recipe.calories} kcal  |  💪 ${recipe.protein.toInt()}g Protein")
+            appendLine("⏱ ${recipe.prepMinutes} min prep time")
             appendLine()
-            appendLine("📦 Ingredientes:")
-            recipe.ingredients.forEach { appendLine("• $it") }
+            appendLine("🛒 Buy at: ${recipe.supermarket}")
             appendLine()
-            appendLine("👨‍🍳 Preparação:")
-            recipe.steps.forEachIndexed { i, step -> appendLine("${i + 1}. $step") }
+            appendLine("📦 Ingredients:")
+            recipe.ingredients.forEach { appendLine("  • $it") }
+            appendLine()
+            appendLine("👨‍🍳 Preparation:")
+            recipe.steps.forEachIndexed { i, step -> appendLine("  ${i + 1}. $step") }
         }
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(recipe.name)
             .setMessage(message)
-            .setPositiveButton("📝 Registar Refeição") { _, _ ->
+            .setPositiveButton("ADD TO DIARY") { _, _ ->
                 val intent = Intent(requireContext(), LogMealActivity::class.java).apply {
                     putExtra("food_name", recipe.name)
                     putExtra("calories", recipe.calories)
@@ -140,21 +141,26 @@ class MealPlanFragment : Fragment() {
                 }
                 startActivity(intent)
             }
-            .setNegativeButton("Fechar", null)
+            .setNegativeButton("CLOSE", null)
             .show()
     }
 
     private fun confirmDeleteMeal(meal: MealLog) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Eliminar Refeição")
-            .setMessage("Eliminar '${meal.foodName}'?")
-            .setPositiveButton("Eliminar") { _, _ -> viewModel.deleteMeal(meal) }
-            .setNegativeButton("Cancelar", null)
+            .setTitle("Delete Entry")
+            .setMessage("Are you sure you want to remove '${meal.foodName}'?")
+            .setPositiveButton("DELETE") { _, _ -> viewModel.deleteMeal(meal) }
+            .setNegativeButton("CANCEL", null)
             .show()
     }
 
     private fun setupClickListeners() {
         binding.fabLogMeal.setOnClickListener {
+            it.animate().rotationBy(90f).setDuration(300).start()
+            startActivity(Intent(requireContext(), LogMealActivity::class.java))
+        }
+        
+        binding.btnQuickLog.setOnClickListener {
             startActivity(Intent(requireContext(), LogMealActivity::class.java))
         }
     }
@@ -165,7 +171,7 @@ class MealPlanFragment : Fragment() {
     }
 }
 
-// ─── RECIPE ADAPTER ────────────────────────────────────────────────────────────
+// ─── IMPROVED RECIPE ADAPTER ───────────────────────────────────────────────────
 
 class RecipeAdapter(
     private val onRecipeClick: (Recipe) -> Unit
@@ -184,6 +190,8 @@ class RecipeAdapter(
         val tvTime: TextView = view.findViewById(R.id.tvRecipeTime)
         val tvSupermarket: TextView = view.findViewById(R.id.tvSupermarket)
         val chipProtein: Chip = view.findViewById(R.id.chipProtein)
+        val chipCarbs: Chip = view.findViewById(R.id.chipCarbs)
+        val chipFat: Chip = view.findViewById(R.id.chipFat)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -197,8 +205,16 @@ class RecipeAdapter(
         holder.tvCalories.text = "${recipe.calories} kcal"
         holder.tvTime.text = "⏱ ${recipe.prepMinutes} min"
         holder.tvSupermarket.text = "🛒 ${recipe.supermarket}"
-        holder.chipProtein.text = "${recipe.protein.toInt()}g prot"
-        holder.itemView.setOnClickListener { onRecipeClick(recipe) }
+        holder.chipProtein.text = "${recipe.protein.toInt()}g P"
+        holder.chipCarbs.text = "${recipe.carbs.toInt()}g C"
+        holder.chipFat.text = "${recipe.fat.toInt()}g F"
+        
+        holder.itemView.setOnClickListener { 
+            it.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction {
+                it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+                onRecipeClick(recipe)
+            }.start()
+        }
     }
 
     override fun getItemCount() = recipes.size
@@ -234,14 +250,8 @@ class MealLogAdapter(
         val meal = meals[position]
         holder.tvFood.text = meal.foodName
         holder.tvCalories.text = "${meal.calories} kcal"
-        holder.tvType.text = when (meal.mealType) {
-            "breakfast" -> "🌅 Pequeno-Almoço"
-            "lunch" -> "☀️ Almoço"
-            "dinner" -> "🌙 Jantar"
-            "snack" -> "🍎 Lanche"
-            else -> meal.mealType
-        }
-        holder.tvMacros.text = "P: ${meal.protein.toInt()}g | C: ${meal.carbs.toInt()}g | G: ${meal.fat.toInt()}g"
+        holder.tvType.text = meal.mealType.uppercase()
+        holder.tvMacros.text = "P: ${meal.protein.toInt()}g | C: ${meal.carbs.toInt()}g | F: ${meal.fat.toInt()}g"
         holder.btnDelete.setOnClickListener { onDelete(meal) }
     }
 
