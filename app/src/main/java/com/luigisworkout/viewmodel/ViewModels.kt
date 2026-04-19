@@ -123,6 +123,25 @@ class MealPlanViewModel(application: Application) : AndroidViewModel(application
     fun deleteMeal(log: MealLog) = viewModelScope.launch { repository.deleteMeal(log) }
 
     suspend fun getRecentFoodNames() = repository.getRecentFoodNames()
+
+    // Shopping List
+    val shoppingItems = repository.getAllShoppingItems()
+
+    fun addShoppingItem(name: String, quantity: String = "", supermarket: String = "Any") = viewModelScope.launch {
+        repository.insertShoppingItem(ShoppingItem(name = name, quantity = quantity, supermarket = supermarket))
+    }
+
+    fun toggleShoppingItem(item: ShoppingItem) = viewModelScope.launch {
+        repository.updateShoppingItem(item.copy(isChecked = !item.isChecked))
+    }
+
+    fun deleteShoppingItem(item: ShoppingItem) = viewModelScope.launch {
+        repository.deleteShoppingItem(item)
+    }
+
+    fun clearCheckedItems() = viewModelScope.launch {
+        repository.clearCheckedShoppingItems()
+    }
 }
 
 // ─── LOG MEAL VIEWMODEL ───────────────────────────────────────────────────────

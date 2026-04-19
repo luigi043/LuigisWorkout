@@ -75,12 +75,22 @@ LuigisWorkout/
 
 ---
 
+## 🛠 Development Workflow
+
+To contribute or track your own changes:
+1. **Create a feature branch:** `git checkout -b feature/your-feature-name`
+2. **Commit your changes:** `git commit -m "Add some feature"`
+3. **Push to the branch:** `git push origin feature/your-feature-name`
+4. **Open a Pull Request.**
+
+---
+
 ## 📊 Future Roadmap
 
-- [ ] Sync functionality (Firebase Integration).
-- [ ] Barcode scanner for food items.
-- [ ] Jetpack Compose migration for enhanced UI fluidity.
-- [ ] Integration with Google Fit / Health Connect.
+- [ ] **Sync functionality:** Firebase Integration for cloud backups.
+- [ ] **Barcode scanner:** Quickly add food items by scanning labels.
+- [ ] **Jetpack Compose migration:** Modernizing the UI for enhanced fluidity.
+- [ ] **Health Integration:** Connection with Google Fit / Health Connect.
 
 ---
 

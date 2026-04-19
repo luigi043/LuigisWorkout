@@ -45,6 +45,16 @@ class AppRepository(context: Context) {
         Triple(p, c, f)
     }
 
+    // ─── SHOPPING LIST ─────────────────────────────────────────────────────────
+
+    private val shoppingItemDao = db.shoppingItemDao()
+
+    fun getAllShoppingItems(): LiveData<List<ShoppingItem>> = shoppingItemDao.getAll()
+    suspend fun insertShoppingItem(item: ShoppingItem) = withContext(Dispatchers.IO) { shoppingItemDao.insert(item) }
+    suspend fun updateShoppingItem(item: ShoppingItem) = withContext(Dispatchers.IO) { shoppingItemDao.update(item) }
+    suspend fun deleteShoppingItem(item: ShoppingItem) = withContext(Dispatchers.IO) { shoppingItemDao.delete(item) }
+    suspend fun clearCheckedShoppingItems() = withContext(Dispatchers.IO) { shoppingItemDao.clearChecked() }
+
     suspend fun getRecentFoodNames(): List<String> = withContext(Dispatchers.IO) {
         mealLogDao.getRecentFoodNames()
     }

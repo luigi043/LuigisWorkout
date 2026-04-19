@@ -5,11 +5,13 @@ import android.os.CountDownTimer
 import android.view.*
 import android.view.animation.AnimationUtils
 import android.widget.*
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.tabs.TabLayout
 import com.luigisworkout.R
 import com.luigisworkout.data.Exercise
 import com.luigisworkout.data.WorkoutDay
@@ -28,6 +30,7 @@ class WorkoutFragment : Fragment() {
     }
 
     private lateinit var exerciseAdapter: ExerciseAdapter
+    private lateinit var historyAdapter: HistoryAdapter
     private var selectedWorkoutDay: WorkoutDay? = null
     private var workoutStartTime: Long = 0L
     private var workoutTimer: CountDownTimer? = null
@@ -41,8 +44,10 @@ class WorkoutFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupTabs()
         setupWeekSelector()
         setupExerciseList()
+        setupHistoryList()
         setupObservers()
         setupClickListeners()
         
@@ -50,8 +55,27 @@ class WorkoutFragment : Fragment() {
         binding.root.layoutAnimation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_animation_fall_down)
     }
 
+    private fun setupTabs() {
+        binding.tabLayoutWorkout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                when (tab?.position) {
+                    0 -> {
+                        binding.planContainer.isVisible = true
+                        binding.rvWorkoutHistory.isVisible = false
+                    }
+                    1 -> {
+                        binding.planContainer.isVisible = false
+                        binding.rvWorkoutHistory.isVisible = true
+                    }
+                }
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
+    }
+
     private fun setupWeekSelector() {
-        val weeks = (1..12).map { "Week $it" }
+        val weeks = (1..12).map { getString(R.string.week_format, it) }
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, weeks)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerWeek.adapter = adapter
@@ -66,7 +90,7 @@ class WorkoutFragment : Fragment() {
 
     private fun loadWeekWorkouts(week: Int) {
         val workouts = viewModel.getWorkoutsByWeek(week)
-        val dayNames = workouts.map { "Day ${it.dayNumber}: ${it.name}" }
+        val dayNames = workouts.map { getString(R.string.day_format, it.dayNumber, it.name) }
 
         val dayAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, dayNames)
         dayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -90,11 +114,9 @@ class WorkoutFragment : Fragment() {
         isWorkoutActive = false
 
         binding.tvWorkoutTitle.text = day.name
-        binding.tvWorkoutType.text = day.type
-        binding.tvWorkoutDuration.text = "⏱ ~${day.estimatedMinutes} min"
-        binding.tvWorkoutCalories.text = "🔥 ~${day.caloriesBurned} kcal"
-        binding.tvExerciseCount.text = "${day.exercises.size} exercises"
-
+        binding.tvWorkoutProgress.text = getString(R.string.exercises_count_format, 0, day.exercises.size)
+        binding.tvElapsedTime.visibility = View.GONE
+        
         exerciseAdapter.submitList(day.exercises)
         binding.rvExercises.scheduleLayoutAnimation()
 
@@ -111,9 +133,15 @@ class WorkoutFragment : Fragment() {
         binding.rvExercises.adapter = exerciseAdapter
     }
 
+    private fun setupHistoryList() {
+        historyAdapter = HistoryAdapter()
+        binding.rvWorkoutHistory.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvWorkoutHistory.adapter = historyAdapter
+    }
+
     private fun setupObservers() {
-        viewModel.completedCount.observe(viewLifecycleOwner) { count ->
-            binding.tvTotalCompleted.text = "$count workouts completed in total"
+        viewModel.allWorkouts.observe(viewLifecycleOwner) { logs ->
+            historyAdapter.submitList(logs)
         }
 
         viewModel.todayWorkout.observe(viewLifecycleOwner) { log ->
@@ -129,7 +157,7 @@ class WorkoutFragment : Fragment() {
         val done = completedExercises.size
         binding.progressWorkout.max = total
         binding.progressWorkout.setProgress(done, true)
-        binding.tvWorkoutProgress.text = "$done / $total exercises"
+        binding.tvWorkoutProgress.text = getString(R.string.exercises_count_format, done, total)
 
         if (done == total && total > 0) {
             binding.btnFinishWorkout.visibility = View.VISIBLE
@@ -140,7 +168,7 @@ class WorkoutFragment : Fragment() {
     }
 
     private fun updateStartButton() {
-        binding.btnStartWorkout.text = "START WORKOUT"
+        binding.btnStartWorkout.text = getString(R.string.start_workout)
         binding.btnStartWorkout.isEnabled = true
         binding.btnFinishWorkout.visibility = View.GONE
         binding.tvElapsedTime.visibility = View.GONE
@@ -159,7 +187,7 @@ class WorkoutFragment : Fragment() {
     private fun startWorkout() {
         isWorkoutActive = true
         workoutStartTime = System.currentTimeMillis()
-        binding.btnStartWorkout.text = "PAUSE"
+        binding.btnStartWorkout.text = getString(R.string.pause_workout)
         binding.tvElapsedTime.visibility = View.VISIBLE
         binding.tvElapsedTime.alpha = 0f
         binding.tvElapsedTime.animate().alpha(1f).setDuration(500).start()
@@ -169,7 +197,7 @@ class WorkoutFragment : Fragment() {
     private fun pauseWorkout() {
         isWorkoutActive = false
         workoutTimer?.cancel()
-        binding.btnStartWorkout.text = "RESUME"
+        binding.btnStartWorkout.text = getString(R.string.resume_workout)
     }
 
     private fun startTimer() {
@@ -179,7 +207,7 @@ class WorkoutFragment : Fragment() {
                 val elapsed = (System.currentTimeMillis() - workoutStartTime) / 1000
                 val minutes = elapsed / 60
                 val seconds = elapsed % 60
-                binding.tvElapsedTime.text = String.format("⏱ %02d:%02d", minutes, seconds)
+                binding.tvElapsedTime.text = String.format(Locale.getDefault(), "⏱ %02d:%02d", minutes, seconds)
             }
             override fun onFinish() {}
         }.start()
@@ -189,17 +217,18 @@ class WorkoutFragment : Fragment() {
         workoutTimer?.cancel()
         val elapsed = ((System.currentTimeMillis() - workoutStartTime) / 1000 / 60).toInt().coerceAtLeast(1)
         val day = selectedWorkoutDay ?: return
+        val calories = day.caloriesBurned * elapsed / day.estimatedMinutes
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Workout Complete! 🎉")
-            .setMessage("Awesome job, Luigi!\n\n✅ ${completedExercises.size}/${day.exercises.size} Exercises\n⏱ $elapsed Minutes\n🔥 Approx. ${day.caloriesBurned * elapsed / day.estimatedMinutes} kcal")
-            .setPositiveButton("Save Result") { _, _ ->
+            .setTitle(R.string.workout_complete_title)
+            .setMessage(getString(R.string.workout_complete_msg, completedExercises.size, day.exercises.size, elapsed, calories))
+            .setPositiveButton(R.string.save_result) { _, _ ->
                 viewModel.logWorkout(day, completedExercises.size, elapsed)
-                binding.btnStartWorkout.text = "Done for Today! ✅"
+                binding.btnStartWorkout.text = getString(R.string.done_today)
                 binding.btnStartWorkout.isEnabled = false
                 binding.btnFinishWorkout.visibility = View.GONE
             }
-            .setNegativeButton("Discard", null)
+            .setNegativeButton(R.string.discard, null)
             .show()
     }
 
@@ -272,9 +301,9 @@ class ExerciseAdapter(
         
         holder.btnProgress.setOnClickListener {
             MaterialAlertDialogBuilder(holder.itemView.context)
-                .setTitle("Track Progress: ${ex.name}")
-                .setMessage("Feature coming soon! You'll be able to see your weight history for this exercise.")
-                .setPositiveButton("OK", null)
+                .setTitle(holder.itemView.context.getString(R.string.track_progress_title, ex.name))
+                .setMessage(R.string.track_progress_msg)
+                .setPositiveButton(R.string.ok, null)
                 .show()
         }
     }

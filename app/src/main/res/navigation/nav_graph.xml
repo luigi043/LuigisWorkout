@@ -29,4 +29,10 @@
         android:label="Progresso"
         tools:layout="@layout/fragment_progress" />
 
+    <fragment
+        android:id="@+id/shoppingListFragment"
+        android:name="com.luigisworkout.ui.mealplan.ShoppingListFragment"
+        android:label="Lista de Compras"
+        tools:layout="@layout/fragment_shopping_list" />
+
 </navigation>

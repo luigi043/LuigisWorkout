@@ -5,200 +5,171 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/background"
-    android:padding="@dimen/spacing_md">
+    android:background="@color/background">
 
-    <!-- Week Selector -->
-    <com.google.android.material.card.MaterialCardView
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutWorkout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/spacing_sm"
-        app:cardBackgroundColor="@color/surface_card"
-        app:cardCornerRadius="@dimen/card_radius"
-        app:cardElevation="4dp">
+        android:background="@color/background"
+        app:tabIndicatorFullWidth="false"
+        app:tabIndicatorHeight="3dp"
+        app:tabSelectedTextColor="@color/primary"
+        app:tabTextColor="@color/text_secondary"
+        app:tabIndicatorColor="@color/primary">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="@dimen/spacing_sm"
-            android:gravity="center_vertical">
+            android:text="@string/tab_plan" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📅 Semana:"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/text_sm"
-                android:layout_marginEnd="8dp" />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tab_history" />
+    </com.google.android.material.tabs.TabLayout>
 
-            <Spinner
-                android:id="@+id/spinnerWeek"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="@color/primary_light" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Dia:"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/text_sm"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="8dp" />
-
-            <Spinner
-                android:id="@+id/spinnerDay"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="@color/primary_light" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Workout Info Card -->
-    <com.google.android.material.card.MaterialCardView
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/spacing_sm"
-        app:cardBackgroundColor="@color/surface_card"
-        app:cardCornerRadius="@dimen/card_radius"
-        app:cardElevation="4dp">
+        android:layout_height="match_parent">
 
+        <!-- PLAN SECTION -->
         <LinearLayout
+            android:id="@+id/planContainer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="@dimen/spacing_md">
+            android:padding="@dimen/spacing_md"
+            android:visibility="visible">
 
-            <TextView
-                android:id="@+id/tvWorkoutTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Corpo Completo A"
-                android:textSize="@dimen/text_lg"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold" />
-
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp">
+                android:layout_marginBottom="@dimen/spacing_sm"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardCornerRadius="@dimen/card_radius"
+                app:cardElevation="4dp">
 
-                <TextView
-                    android:id="@+id/tvWorkoutType"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Força"
-                    android:textSize="@dimen/text_xs"
-                    android:textColor="@color/accent"
-                    android:background="@color/surface_variant"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="2dp" />
+                    android:orientation="horizontal"
+                    android:padding="@dimen/spacing_sm"
+                    android:gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/tvWorkoutDuration"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="⏱ ~35 min"
-                    android:textSize="@dimen/text_xs"
-                    android:textColor="@color/text_secondary"
-                    android:layout_marginStart="8dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/week_label"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_sm"
+                        android:layout_marginEnd="8dp" />
 
-                <TextView
-                    android:id="@+id/tvWorkoutCalories"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🔥 ~200 kcal"
-                    android:textSize="@dimen/text_xs"
-                    android:textColor="@color/text_secondary"
-                    android:layout_marginStart="8dp" />
+                    <Spinner
+                        android:id="@+id/spinnerWeek"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
 
-                <TextView
-                    android:id="@+id/tvExerciseCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="6 exercícios"
-                    android:textSize="@dimen/text_xs"
-                    android:textColor="@color/text_hint"
-                    android:layout_marginStart="8dp" />
-            </LinearLayout>
+                    <Spinner
+                        android:id="@+id/spinnerDay"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Progress -->
-            <ProgressBar
-                android:id="@+id/progressWorkout"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/progress_height"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:progressDrawable="@drawable/bg_progress_bar"
-                android:max="6"
-                android:progress="0" />
-
-            <TextView
-                android:id="@+id/tvWorkoutProgress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0 / 6 exercícios"
-                android:textSize="@dimen/text_xs"
-                android:textColor="@color/text_hint"
-                android:layout_marginTop="2dp" />
-
-            <TextView
-                android:id="@+id/tvElapsedTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⏱ 00:00"
-                android:textSize="@dimen/text_lg"
-                android:textColor="@color/accent"
-                android:textStyle="bold"
-                android:layout_marginTop="4dp"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/tvTotalCompleted"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0 treinos concluídos"
-                android:textSize="@dimen/text_xs"
-                android:textColor="@color/text_hint"
-                android:layout_marginTop="2dp" />
-
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="@dimen/spacing_sm">
+                android:layout_marginBottom="@dimen/spacing_sm"
+                app:cardBackgroundColor="@color/surface_card"
+                app:cardCornerRadius="@dimen/card_radius"
+                app:cardElevation="4dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnStartWorkout"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:layout_marginEnd="8dp"
-                    android:text="▶ Começar Treino"
-                    style="@style/ButtonAccent" />
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnFinishWorkout"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="✅ Concluir"
-                    android:visibility="gone"
-                    style="@style/ButtonPrimary" />
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/tvWorkoutTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/text_lg"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tvWorkoutProgress"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/workout_progress_initial"
+                            android:textSize="@dimen/text_sm"
+                            android:textColor="@color/text_secondary" />
+
+                        <TextView
+                            android:id="@+id/tvElapsedTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/timer_initial"
+                            android:textSize="@dimen/text_sm"
+                            android:textColor="@color/primary"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <ProgressBar
+                        android:id="@+id/progressWorkout"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/progress_height"
+                        android:layout_marginTop="4dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="@dimen/spacing_sm">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnStartWorkout"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/start_workout" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnFinishWorkout"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/finish_workout"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvExercises"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
 
-    <!-- Exercise List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvExercises"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingBottom="@dimen/spacing_md" />
+        <!-- HISTORY SECTION -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvWorkoutHistory"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:padding="@dimen/spacing_md" />
+
+    </FrameLayout>
 </LinearLayout>

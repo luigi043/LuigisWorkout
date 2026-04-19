@@ -13,7 +13,8 @@ import com.luigisworkout.data.database.entities.*
         WeightLog::class,
         WorkoutLog::class,
         UserProfile::class,
-        DailyGoal::class
+        DailyGoal::class,
+        ShoppingItem::class
     ],
     version = 1,
     exportSchema = false
@@ -25,6 +26,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun workoutLogDao(): WorkoutLogDao
     abstract fun userProfileDao(): UserProfileDao
     abstract fun dailyGoalDao(): DailyGoalDao
+    abstract fun shoppingItemDao(): ShoppingItemDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null

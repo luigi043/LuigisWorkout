@@ -149,3 +149,27 @@ interface DailyGoalDao {
     @Query("SELECT * FROM daily_goals WHERE date = :date")
     suspend fun getByDateSync(date: String): DailyGoal?
 }
+
+// ─── SHOPPING ITEM DAO ─────────────────────────────────────────────────────────
+
+@Dao
+interface ShoppingItemDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(item: ShoppingItem): Long
+
+    @Update
+    suspend fun update(item: ShoppingItem)
+
+    @Delete
+    suspend fun delete(item: ShoppingItem)
+
+    @Query("SELECT * FROM shopping_items ORDER BY isChecked ASC, timestamp DESC")
+    fun getAll(): LiveData<List<ShoppingItem>>
+
+    @Query("DELETE FROM shopping_items WHERE isChecked = 1")
+    suspend fun clearChecked()
+
+    @Query("SELECT * FROM shopping_items WHERE supermarket = :supermarket ORDER BY timestamp DESC")
+    fun getBySupermarket(supermarket: String): LiveData<List<ShoppingItem>>
+}

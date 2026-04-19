@@ -34,11 +34,47 @@
 
     <!-- Workout -->
     <string name="workout_plan">Workout Plan</string>
-    <string name="week_label">Week</string>
-    <string name="start_workout">Start Workout</string>
-    <string name="complete_workout">Complete Workout</string>
-    <string name="calories_burned">kcal burned</string>
-    <string name="minutes">min</string>
+    <string name="tab_plan">Plan</string>
+    <string name="tab_history">History</string>
+    <string name="week_label">Week:</string>
+    <string name="week_format">Week %d</string>
+    <string name="day_format">Day %1$d: %2$s</string>
+    <string name="start_workout">Start</string>
+    <string name="pause_workout">Pause</string>
+    <string name="resume_workout">Resume</string>
+    <string name="finish_workout">Finish</string>
+    <string name="exercises_count_format">%1$d / %2$d exercises</string>
+    <string name="workout_progress_initial">0 / 0 exercises</string>
+    <string name="timer_initial">⏱ 00:00</string>
+    <string name="workout_complete_title">Workout Complete! 🎉</string>
+    <string name="workout_complete_msg">Awesome job, Luigi!\n\n✅ %1$d/%2$d Exercises\n⏱ %3$d Minutes\n🔥 Approx. %4$d kcal</string>
+    <string name="save_result">Save Result</string>
+    <string name="discard">Discard</string>
+    <string name="done_today">Done for Today! ✅</string>
+    <string name="calories_burned_unit">%1$d kcal</string>
+    <string name="calories_unit">%1$d kcal</string>
+    <string name="consumed_today_label">CONSUMED TODAY</string>
+    <string name="btn_shopping_list">🛒 List</string>
+    <string name="workout_history_details">%1$d / %2$d exercises • %3$d min</string>
+
+    <string name="sets_label">SETS</string>
+    <string name="reps_label">REPS</string>
+    <string name="rest_label">REST</string>
+    <string name="track_progress">Track Progress</string>
+    <string name="track_progress_title">Track Progress: %s</string>
+    <string name="track_progress_msg">Feature coming soon! You\'ll be able to see your weight history for this exercise.</string>
+    <string name="ok">OK</string>
+
+    <!-- Shopping List -->
+    <string name="shopping_list_title">Shopping List</string>
+    <string name="add_item_hint">Add item...</string>
+    <string name="clear_checked">Clear Checked</string>
+    <string name="no_items">No items yet</string>
+    <string name="supermarket_any">Any</string>
+    <string name="supermarket_lidl">Lidl</string>
+    <string name="supermarket_pingo_doce">Pingo Doce</string>
+    <string name="supermarket_continente">Continente</string>
+    <string name="add_item_label">ADD ITEM</string>
 
     <!-- Progress -->
     <string name="progress_title">Progress</string>

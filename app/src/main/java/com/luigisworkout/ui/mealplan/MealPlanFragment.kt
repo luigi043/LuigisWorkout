@@ -163,6 +163,10 @@ class MealPlanFragment : Fragment() {
         binding.btnQuickLog.setOnClickListener {
             startActivity(Intent(requireContext(), LogMealActivity::class.java))
         }
+
+        binding.btnGoToShopping.setOnClickListener {
+            androidx.navigation.fragment.findNavController().navigate(R.id.shoppingListFragment)
+        }
     }
 
     override fun onDestroyView() {

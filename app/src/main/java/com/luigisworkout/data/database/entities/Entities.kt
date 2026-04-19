@@ -76,3 +76,16 @@ data class DailyGoal(
     val stepsCount: Int = 0,
     val stepsGoal: Int = 8000
 )
+
+// ─── SHOPPING LIST ─────────────────────────────────────────────────────────────
+
+@Entity(tableName = "shopping_items")
+data class ShoppingItem(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val quantity: String = "",
+    val supermarket: String = "Any",
+    val isChecked: Boolean = false,
+    val category: String = "General",
+    val timestamp: Long = System.currentTimeMillis()
+)
