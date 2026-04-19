@@ -172,6 +172,52 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     val fullPlan = AppContent.workoutPlan
 
+    // Timer state for persistence across configuration changes or tab switches
+    var isWorkoutActive = false
+    var workoutStartTime = 0L
+    private var timerJob: kotlinx.coroutines.Job? = null
+    private val _elapsedTime = MutableLiveData<String>()
+    val elapsedTime: LiveData<String> = _elapsedTime
+
+    fun startWorkout() {
+        if (isWorkoutActive) return
+        isWorkoutActive = true
+        if (workoutStartTime == 0L) {
+            workoutStartTime = System.currentTimeMillis()
+        }
+        startTimer()
+    }
+
+    fun pauseWorkout() {
+        isWorkoutActive = false
+        timerJob?.cancel()
+    }
+
+    fun resumeWorkout() {
+        isWorkoutActive = true
+        startTimer()
+    }
+
+    private fun startTimer() {
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            while (isWorkoutActive) {
+                val elapsed = (System.currentTimeMillis() - workoutStartTime) / 1000
+                val minutes = elapsed / 60
+                val seconds = elapsed % 60
+                _elapsedTime.postValue(String.format(Locale.getDefault(), "⏱ %02d:%02d", minutes, seconds))
+                kotlinx.coroutines.delay(1000)
+            }
+        }
+    }
+
+    fun resetWorkout() {
+        isWorkoutActive = false
+        workoutStartTime = 0L
+        timerJob?.cancel()
+        _elapsedTime.value = "⏱ 00:00"
+    }
+
     fun getWorkoutsByWeek(week: Int) = fullPlan.filter { it.weekNumber == week }
 
     fun logWorkout(

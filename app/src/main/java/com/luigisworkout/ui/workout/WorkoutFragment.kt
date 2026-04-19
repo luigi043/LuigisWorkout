@@ -1,7 +1,6 @@
 package com.luigisworkout.ui.workout
 
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.view.*
 import android.view.animation.AnimationUtils
 import android.widget.*
@@ -32,10 +31,7 @@ class WorkoutFragment : Fragment() {
     private lateinit var exerciseAdapter: ExerciseAdapter
     private lateinit var historyAdapter: HistoryAdapter
     private var selectedWorkoutDay: WorkoutDay? = null
-    private var workoutStartTime: Long = 0L
-    private var workoutTimer: CountDownTimer? = null
     private var completedExercises = mutableSetOf<Int>()
-    private var isWorkoutActive = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentWorkoutBinding.inflate(inflater, container, false)
@@ -50,6 +46,12 @@ class WorkoutFragment : Fragment() {
         setupHistoryList()
         setupObservers()
         setupClickListeners()
+
+        // Restore UI if workout is already running
+        if (viewModel.isWorkoutActive) {
+            binding.tvElapsedTime.visibility = View.VISIBLE
+            binding.btnStartWorkout.text = getString(R.string.pause_workout)
+        }
         
         // Initial animation
         binding.root.layoutAnimation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_animation_fall_down)
@@ -111,11 +113,14 @@ class WorkoutFragment : Fragment() {
     private fun loadWorkoutDay(day: WorkoutDay) {
         selectedWorkoutDay = day
         completedExercises.clear()
-        isWorkoutActive = false
+        
+        if (!viewModel.isWorkoutActive) {
+            viewModel.resetWorkout()
+            binding.tvElapsedTime.visibility = View.GONE
+        }
 
         binding.tvWorkoutTitle.text = day.name
         binding.tvWorkoutProgress.text = getString(R.string.exercises_count_format, 0, day.exercises.size)
-        binding.tvElapsedTime.visibility = View.GONE
         
         exerciseAdapter.submitList(day.exercises)
         binding.rvExercises.scheduleLayoutAnimation()
@@ -146,9 +151,13 @@ class WorkoutFragment : Fragment() {
 
         viewModel.todayWorkout.observe(viewLifecycleOwner) { log ->
             if (log?.completed == true) {
-                binding.btnStartWorkout.text = "Completed Today ✅"
+                binding.btnStartWorkout.text = getString(R.string.done_today)
                 binding.btnStartWorkout.isEnabled = false
             }
+        }
+
+        viewModel.elapsedTime.observe(viewLifecycleOwner) { time ->
+            binding.tvElapsedTime.text = time
         }
     }
 
@@ -168,15 +177,22 @@ class WorkoutFragment : Fragment() {
     }
 
     private fun updateStartButton() {
-        binding.btnStartWorkout.text = getString(R.string.start_workout)
-        binding.btnStartWorkout.isEnabled = true
-        binding.btnFinishWorkout.visibility = View.GONE
-        binding.tvElapsedTime.visibility = View.GONE
+        if (!viewModel.isWorkoutActive) {
+            binding.btnStartWorkout.text = getString(R.string.start_workout)
+            binding.btnStartWorkout.isEnabled = true
+            binding.btnFinishWorkout.visibility = View.GONE
+        } else {
+            binding.btnStartWorkout.text = getString(R.string.pause_workout)
+        }
     }
 
     private fun setupClickListeners() {
         binding.btnStartWorkout.setOnClickListener {
-            if (!isWorkoutActive) startWorkout() else pauseWorkout()
+            if (!viewModel.isWorkoutActive) {
+                startWorkout()
+            } else {
+                pauseWorkout()
+            }
         }
 
         binding.btnFinishWorkout.setOnClickListener {
@@ -185,37 +201,21 @@ class WorkoutFragment : Fragment() {
     }
 
     private fun startWorkout() {
-        isWorkoutActive = true
-        workoutStartTime = System.currentTimeMillis()
+        viewModel.startWorkout()
         binding.btnStartWorkout.text = getString(R.string.pause_workout)
         binding.tvElapsedTime.visibility = View.VISIBLE
         binding.tvElapsedTime.alpha = 0f
         binding.tvElapsedTime.animate().alpha(1f).setDuration(500).start()
-        startTimer()
     }
 
     private fun pauseWorkout() {
-        isWorkoutActive = false
-        workoutTimer?.cancel()
+        viewModel.pauseWorkout()
         binding.btnStartWorkout.text = getString(R.string.resume_workout)
     }
 
-    private fun startTimer() {
-        workoutTimer?.cancel()
-        workoutTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                val elapsed = (System.currentTimeMillis() - workoutStartTime) / 1000
-                val minutes = elapsed / 60
-                val seconds = elapsed % 60
-                binding.tvElapsedTime.text = String.format(Locale.getDefault(), "⏱ %02d:%02d", minutes, seconds)
-            }
-            override fun onFinish() {}
-        }.start()
-    }
-
     private fun finishWorkout() {
-        workoutTimer?.cancel()
-        val elapsed = ((System.currentTimeMillis() - workoutStartTime) / 1000 / 60).toInt().coerceAtLeast(1)
+        viewModel.pauseWorkout()
+        val elapsed = ((System.currentTimeMillis() - viewModel.workoutStartTime) / 1000 / 60).toInt().coerceAtLeast(1)
         val day = selectedWorkoutDay ?: return
         val calories = day.caloriesBurned * elapsed / day.estimatedMinutes
 
@@ -224,16 +224,19 @@ class WorkoutFragment : Fragment() {
             .setMessage(getString(R.string.workout_complete_msg, completedExercises.size, day.exercises.size, elapsed, calories))
             .setPositiveButton(R.string.save_result) { _, _ ->
                 viewModel.logWorkout(day, completedExercises.size, elapsed)
+                viewModel.resetWorkout()
                 binding.btnStartWorkout.text = getString(R.string.done_today)
                 binding.btnStartWorkout.isEnabled = false
                 binding.btnFinishWorkout.visibility = View.GONE
+                binding.tvElapsedTime.visibility = View.GONE
             }
-            .setNegativeButton(R.string.discard, null)
+            .setNegativeButton(R.string.discard) { _, _ ->
+                viewModel.resumeWorkout()
+            }
             .show()
     }
 
     override fun onDestroyView() {
-        workoutTimer?.cancel()
         super.onDestroyView()
         _binding = null
     }
