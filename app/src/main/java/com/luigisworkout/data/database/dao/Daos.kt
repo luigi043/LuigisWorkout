@@ -173,3 +173,27 @@ interface ShoppingItemDao {
     @Query("SELECT * FROM shopping_items WHERE supermarket = :supermarket ORDER BY timestamp DESC")
     fun getBySupermarket(supermarket: String): LiveData<List<ShoppingItem>>
 }
+
+// ─── EXERCISE LOG DAO ──────────────────────────────────────────────────────────
+
+@Dao
+interface ExerciseLogDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(log: ExerciseLog): Long
+
+    @Update
+    suspend fun update(log: ExerciseLog)
+
+    @Delete
+    suspend fun delete(log: ExerciseLog)
+
+    @Query("SELECT * FROM exercise_logs WHERE exerciseName = :exerciseName ORDER BY date DESC")
+    fun getHistoryByExercise(exerciseName: String): LiveData<List<ExerciseLog>>
+
+    @Query("SELECT * FROM exercise_logs WHERE exerciseName = :exerciseName ORDER BY date DESC LIMIT 1")
+    suspend fun getLatestForExercise(exerciseName: String): ExerciseLog?
+
+    @Query("SELECT * FROM exercise_logs WHERE date = :date ORDER BY timestamp ASC")
+    fun getByDate(date: String): LiveData<List<ExerciseLog>>
+}

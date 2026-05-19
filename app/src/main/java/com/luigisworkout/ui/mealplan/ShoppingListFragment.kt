@@ -9,13 +9,16 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.luigisworkout.R
 import com.luigisworkout.data.database.entities.ShoppingItem
 import com.luigisworkout.databinding.FragmentShoppingListBinding
-import com.luigisworkout.viewmodel.AppViewModelFactory
+import com.luigisworkout.luigiApp
 import com.luigisworkout.viewmodel.MealPlanViewModel
+import com.luigisworkout.viewmodel.appViewModelFactory
 
 class ShoppingListFragment : Fragment() {
 
@@ -23,7 +26,7 @@ class ShoppingListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: MealPlanViewModel by activityViewModels {
-        AppViewModelFactory(requireActivity().application)
+        appViewModelFactory(requireActivity().luigiApp)
     }
 
     private lateinit var adapter: ShoppingAdapter
@@ -85,16 +88,14 @@ class ShoppingListFragment : Fragment() {
 class ShoppingAdapter(
     private val onToggle: (ShoppingItem) -> Unit,
     private val onDelete: (ShoppingItem) -> Unit
-) : RecyclerView.Adapter<ShoppingAdapter.ViewHolder>() {
+) : ListAdapter<ShoppingItem, ShoppingAdapter.ViewHolder>(DIFF) {
 
-    private var items = listOf<ShoppingItem>()
-
-    fun submitList(list: List<ShoppingItem>) {
-        items = list
-        notifyDataSetChanged()
+    object DIFF : DiffUtil.ItemCallback<ShoppingItem>() {
+        override fun areItemsTheSame(oldItem: ShoppingItem, newItem: ShoppingItem) = oldItem.id == newItem.id
+        override fun areContentsTheSame(oldItem: ShoppingItem, newItem: ShoppingItem) = oldItem == newItem
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val cbChecked: CheckBox = view.findViewById(R.id.cbChecked)
         val tvName: TextView = view.findViewById(R.id.tvItemName)
         val tvDetails: TextView = view.findViewById(R.id.tvItemDetails)
@@ -107,21 +108,18 @@ class ShoppingAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
+        val item = getItem(position)
         holder.tvName.text = item.name
         holder.tvDetails.text = if (item.quantity.isNotEmpty()) item.quantity else item.supermarket
-        
+
+        // Detach listener before mutating state so the recycled checkbox doesn't fire
+        // our toggle callback with stale data.
         holder.cbChecked.setOnCheckedChangeListener(null)
         holder.cbChecked.isChecked = item.isChecked
-        
         holder.cbChecked.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked != item.isChecked) {
-                onToggle(item)
-            }
+            if (isChecked != item.isChecked) onToggle(item)
         }
 
         holder.btnDelete.setOnClickListener { onDelete(item) }
     }
-
-    override fun getItemCount() = items.size
 }

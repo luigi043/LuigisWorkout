@@ -8,7 +8,9 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -17,9 +19,10 @@ import com.luigisworkout.R
 import com.luigisworkout.data.Recipe
 import com.luigisworkout.data.database.entities.MealLog
 import com.luigisworkout.databinding.FragmentMealPlanBinding
+import com.luigisworkout.luigiApp
 import com.luigisworkout.ui.logmeal.LogMealActivity
-import com.luigisworkout.viewmodel.AppViewModelFactory
 import com.luigisworkout.viewmodel.MealPlanViewModel
+import com.luigisworkout.viewmodel.appViewModelFactory
 
 class MealPlanFragment : Fragment() {
 
@@ -27,7 +30,7 @@ class MealPlanFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: MealPlanViewModel by activityViewModels {
-        AppViewModelFactory(requireActivity().application)
+        appViewModelFactory(requireActivity().luigiApp)
     }
 
     private lateinit var recipeAdapter: RecipeAdapter
@@ -183,17 +186,16 @@ class MealPlanFragment : Fragment() {
     }
 }
 
-// ─── IMPROVED RECIPE ADAPTER ───────────────────────────────────────────────────
+// ─── RECIPE ADAPTER ────────────────────────────────────────────────────────────
 
 class RecipeAdapter(
     private val onRecipeClick: (Recipe) -> Unit
-) : RecyclerView.Adapter<RecipeAdapter.ViewHolder>() {
+) : ListAdapter<Recipe, RecipeAdapter.ViewHolder>(DIFF) {
 
-    private var recipes = listOf<Recipe>()
-
-    fun submitList(list: List<Recipe>) {
-        recipes = list
-        notifyDataSetChanged()
+    object DIFF : DiffUtil.ItemCallback<Recipe>() {
+        // Recipes don't have a Room id — use name as the stable key (unique in AppContent).
+        override fun areItemsTheSame(oldItem: Recipe, newItem: Recipe) = oldItem.name == newItem.name
+        override fun areContentsTheSame(oldItem: Recipe, newItem: Recipe) = oldItem == newItem
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -212,7 +214,7 @@ class RecipeAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val recipe = recipes[position]
+        val recipe = getItem(position)
         holder.tvName.text = recipe.name
         holder.tvCalories.text = "${recipe.calories} kcal"
         holder.tvTime.text = "⏱ ${recipe.prepMinutes} min"
@@ -220,29 +222,25 @@ class RecipeAdapter(
         holder.chipProtein.text = "${recipe.protein.toInt()}g P"
         holder.chipCarbs.text = "${recipe.carbs.toInt()}g C"
         holder.chipFat.text = "${recipe.fat.toInt()}g F"
-        
-        holder.itemView.setOnClickListener { 
+
+        holder.itemView.setOnClickListener {
             it.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction {
                 it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
                 onRecipeClick(recipe)
             }.start()
         }
     }
-
-    override fun getItemCount() = recipes.size
 }
 
 // ─── MEAL LOG ADAPTER ─────────────────────────────────────────────────────────
 
 class MealLogAdapter(
     private val onDelete: (MealLog) -> Unit
-) : RecyclerView.Adapter<MealLogAdapter.ViewHolder>() {
+) : ListAdapter<MealLog, MealLogAdapter.ViewHolder>(DIFF) {
 
-    private var meals = listOf<MealLog>()
-
-    fun submitList(list: List<MealLog>) {
-        meals = list
-        notifyDataSetChanged()
+    object DIFF : DiffUtil.ItemCallback<MealLog>() {
+        override fun areItemsTheSame(oldItem: MealLog, newItem: MealLog) = oldItem.id == newItem.id
+        override fun areContentsTheSame(oldItem: MealLog, newItem: MealLog) = oldItem == newItem
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -259,10 +257,10 @@ class MealLogAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val meal = meals[position]
+        val meal = getItem(position)
         holder.tvFood.text = meal.foodName
         holder.tvCalories.text = "${meal.calories} kcal"
-        holder.tvType.text = when(meal.mealType.lowercase()) {
+        holder.tvType.text = when (meal.mealType.lowercase()) {
             "breakfast" -> "🌅 " + holder.itemView.context.getString(R.string.tab_breakfast)
             "lunch" -> "☀️ " + holder.itemView.context.getString(R.string.tab_lunch)
             "dinner" -> "🌙 " + holder.itemView.context.getString(R.string.tab_dinner)
@@ -272,6 +270,4 @@ class MealLogAdapter(
         holder.tvMacros.text = "P: ${meal.protein.toInt()}g | C: ${meal.carbs.toInt()}g | F: ${meal.fat.toInt()}g"
         holder.btnDelete.setOnClickListener { onDelete(meal) }
     }
-
-    override fun getItemCount() = meals.size
 }

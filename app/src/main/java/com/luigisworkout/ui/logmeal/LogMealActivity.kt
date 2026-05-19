@@ -9,23 +9,25 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.luigisworkout.R
 import com.luigisworkout.data.AppContent
 import com.luigisworkout.data.FoodItem
 import com.luigisworkout.data.database.entities.MealLog
 import com.luigisworkout.databinding.ActivityLogMealBinding
-import com.luigisworkout.viewmodel.AppViewModelFactory
+import com.luigisworkout.luigiApp
+import com.luigisworkout.util.AppClock
 import com.luigisworkout.viewmodel.LogMealViewModel
-import java.text.SimpleDateFormat
-import java.util.*
+import com.luigisworkout.viewmodel.appViewModelFactory
 
 class LogMealActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLogMealBinding
     private val viewModel: LogMealViewModel by viewModels {
-        AppViewModelFactory(application)
+        appViewModelFactory(luigiApp)
     }
 
     private lateinit var foodSearchAdapter: FoodSearchAdapter
@@ -141,9 +143,8 @@ class LogMealActivity : AppCompatActivity() {
                 else -> "lunch"
             }
 
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val log = MealLog(
-                date = dateFormat.format(Date()),
+                date = AppClock.todayString(),
                 mealType = mealType,
                 foodName = name,
                 calories = (calories * quantity).toInt(),
@@ -175,16 +176,15 @@ class LogMealActivity : AppCompatActivity() {
 
 class FoodSearchAdapter(
     private val onFoodClick: (FoodItem) -> Unit
-) : RecyclerView.Adapter<FoodSearchAdapter.ViewHolder>() {
+) : ListAdapter<FoodItem, FoodSearchAdapter.ViewHolder>(DIFF) {
 
-    private var items = listOf<FoodItem>()
-
-    fun submitList(list: List<FoodItem>) {
-        items = list
-        notifyDataSetChanged()
+    object DIFF : DiffUtil.ItemCallback<FoodItem>() {
+        // FoodItem name is the natural key inside AppContent.foodDatabase.
+        override fun areItemsTheSame(oldItem: FoodItem, newItem: FoodItem) = oldItem.name == newItem.name
+        override fun areContentsTheSame(oldItem: FoodItem, newItem: FoodItem) = oldItem == newItem
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvName: TextView = view.findViewById(R.id.tvFoodSearchName)
         val tvDetails: TextView = view.findViewById(R.id.tvFoodSearchDetails)
     }
@@ -195,11 +195,9 @@ class FoodSearchAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val food = items[position]
+        val food = getItem(position)
         holder.tvName.text = food.name
         holder.tvDetails.text = "${food.calories} kcal/${food.unit} | P:${food.protein.toInt()}g C:${food.carbs.toInt()}g F:${food.fat.toInt()}g | ${food.supermarket}"
         holder.itemView.setOnClickListener { onFoodClick(food) }
     }
-
-    override fun getItemCount() = items.size
 }

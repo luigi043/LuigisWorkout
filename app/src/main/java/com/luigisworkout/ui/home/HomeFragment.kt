@@ -13,13 +13,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.luigisworkout.R
+import com.luigisworkout.data.AppContent
 import com.luigisworkout.databinding.FragmentHomeBinding
+import com.luigisworkout.luigiApp
 import com.luigisworkout.ui.logmeal.LogMealActivity
 import com.luigisworkout.ui.logweight.LogWeightActivity
-import com.luigisworkout.viewmodel.AppViewModelFactory
+import com.luigisworkout.util.AppClock
 import com.luigisworkout.viewmodel.HomeViewModel
-import java.text.SimpleDateFormat
-import java.util.*
+import com.luigisworkout.viewmodel.appViewModelFactory
+import java.util.Calendar
 
 class HomeFragment : Fragment() {
 
@@ -27,8 +29,11 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: HomeViewModel by activityViewModels {
-        AppViewModelFactory(requireActivity().application)
+        appViewModelFactory(requireActivity().luigiApp)
     }
+
+    /** Cached so we can skip rebuilding the 28-day calendar grid on identical emissions. */
+    private var lastCalendarSignature: Set<String>? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -37,52 +42,64 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         setupGreeting()
         setupCalendar()
         setupObservers()
         setupClickListeners()
-        animateEntrance()
-        
+
+        // Only animate on cold start — re-entering from another tab shouldn't replay
+        // the entrance, which previously flashed every time the user tapped Home.
+        if (savedInstanceState == null) animateEntrance()
+
         viewModel.refreshMacros()
     }
 
     private fun setupCalendar() {
+        viewModel.recentWeekWorkouts.observe(viewLifecycleOwner) { workouts ->
+            val completedDates = workouts.asSequence()
+                .filter { it.completed }
+                .map { it.date }
+                .toSet()
+
+            // Skip the rebuild if nothing changed. Saves 28 view inflations / layout passes
+            // on every meal/weight/workout-list emission upstream.
+            if (completedDates == lastCalendarSignature && binding.gridCalendar.childCount == 28) return@observe
+            lastCalendarSignature = completedDates
+
+            renderCalendar(completedDates)
+        }
+    }
+
+    private fun renderCalendar(completedDates: Set<String>) {
         binding.gridCalendar.removeAllViews()
 
-        viewModel.recentWeekWorkouts.observe(viewLifecycleOwner) { workouts ->
-            binding.gridCalendar.removeAllViews()
-            
-            val calendar = Calendar.getInstance()
-            // We want to show the last 28 days
-            calendar.add(Calendar.DAY_OF_YEAR, -27)
-            
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val completedDates = workouts.filter { it.completed }.map { it.date }.toSet()
+        val size = resources.getDimensionPixelSize(R.dimen.spacing_md)
+        val completedTint = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.primary))
+        val emptyTint = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.surface_variant))
+        val bg = ContextCompat.getDrawable(requireContext(), R.drawable.bg_calendar_day)
 
-            for (i in 0 until 28) {
-                val currentDate = dateFormat.format(calendar.time)
-                val isCompleted = completedDates.contains(currentDate)
-                
-                val dayView = View(requireContext())
-                val size = resources.getDimensionPixelSize(R.dimen.spacing_md)
-                val params = GridLayout.LayoutParams().apply {
+        val calendar = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -27) }
+
+        repeat(28) {
+            val isoDate = AppClock.todayString().let {
+                // Cheap one-shot format using the calendar we already advance.
+                val y = calendar.get(Calendar.YEAR)
+                val m = calendar.get(Calendar.MONTH) + 1
+                val d = calendar.get(Calendar.DAY_OF_MONTH)
+                "%04d-%02d-%02d".format(y, m, d)
+            }
+            val dayView = View(requireContext()).apply {
+                layoutParams = GridLayout.LayoutParams().apply {
                     width = size
                     height = size
                     setMargins(4, 4, 4, 4)
                 }
-                dayView.layoutParams = params
-                
-                dayView.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_calendar_day)
-                if (isCompleted) {
-                    dayView.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.primary))
-                } else {
-                    dayView.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.surface_variant))
-                }
-                
-                binding.gridCalendar.addView(dayView)
-                calendar.add(Calendar.DAY_OF_YEAR, 1)
+                background = bg
+                backgroundTintList = if (isoDate in completedDates) completedTint else emptyTint
             }
+            binding.gridCalendar.addView(dayView)
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
     }
 
@@ -94,9 +111,7 @@ class HomeFragment : Fragment() {
             else -> R.string.greeting_evening
         }
         binding.tvGreeting.text = getString(greetingRes)
-
-        val sdf = SimpleDateFormat("EEEE, MMMM d", Locale.ENGLISH)
-        binding.tvDate.text = sdf.format(Date())
+        binding.tvDate.text = AppClock.longDateHeader()
     }
 
     private fun animateEntrance() {
@@ -104,7 +119,7 @@ class HomeFragment : Fragment() {
         binding.headerLayout.translationY = -50f
         binding.caloriesCard.alpha = 0f
         binding.caloriesCard.translationY = 50f
-        
+
         binding.headerLayout.animate()
             .alpha(1f)
             .translationY(0f)
@@ -124,11 +139,11 @@ class HomeFragment : Fragment() {
     private fun setupObservers() {
         viewModel.todayCalories.observe(viewLifecycleOwner) { calories ->
             val kcal = calories ?: 0
-            val goal = 2000 // Sample goal
+            val goal = 2000 // TODO: pull from DailyGoal once goal UI lands
             binding.tvCaloriesConsumed.text = kcal.toString()
             binding.progressCalories.max = goal
             binding.progressCalories.setProgress(kcal, true)
-            
+
             val remaining = (goal - kcal).coerceAtLeast(0)
             binding.tvCaloriesRemaining.text = getString(R.string.calories_remaining_format, remaining)
         }
@@ -155,23 +170,16 @@ class HomeFragment : Fragment() {
         }
 
         viewModel.latestWeight.observe(viewLifecycleOwner) { weight ->
-            if (weight != null) {
-                binding.tvCurrentWeight.text = String.format("%.1f", weight.weightKg)
-            } else {
-                binding.tvCurrentWeight.text = "--.-"
-            }
+            binding.tvCurrentWeight.text = weight?.weightKg?.let { String.format("%.1f", it) } ?: "--.-"
         }
 
-        // Motivational tip from AppContent
-        val tips = listOf(
-            "💪 Don't stop until you're proud.",
-            "💧 Hydration is the key to recovery.",
-            "🥗 Fuel your body with the right macros.",
-            "🔥 One more rep makes the difference!",
-            "⚡ Discipline beats motivation every time."
-        )
-        val dayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
-        binding.tvDailyTip.text = tips[dayOfYear % tips.size]
+        // Pull the daily tip from AppContent so we have one source of truth, not a
+        // local 5-entry copy that drifts out of sync with the real 30-tip rotation.
+        val tips = AppContent.motivationalTips
+        if (tips.isNotEmpty()) {
+            val dayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+            binding.tvDailyTip.text = tips[dayOfYear % tips.size]
+        }
     }
 
     private fun setupClickListeners() {

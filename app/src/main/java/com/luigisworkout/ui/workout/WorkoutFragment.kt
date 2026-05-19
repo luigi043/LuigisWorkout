@@ -7,7 +7,9 @@ import android.widget.*
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
@@ -15,9 +17,9 @@ import com.luigisworkout.R
 import com.luigisworkout.data.Exercise
 import com.luigisworkout.data.WorkoutDay
 import com.luigisworkout.databinding.FragmentWorkoutBinding
-import com.luigisworkout.viewmodel.AppViewModelFactory
+import com.luigisworkout.luigiApp
 import com.luigisworkout.viewmodel.WorkoutViewModel
-import java.util.*
+import com.luigisworkout.viewmodel.appViewModelFactory
 
 class WorkoutFragment : Fragment() {
 
@@ -25,7 +27,7 @@ class WorkoutFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: WorkoutViewModel by activityViewModels {
-        AppViewModelFactory(requireActivity().application)
+        appViewModelFactory(requireActivity().luigiApp)
     }
 
     private lateinit var exerciseAdapter: ExerciseAdapter
@@ -130,7 +132,7 @@ class WorkoutFragment : Fragment() {
     }
 
     private fun setupExerciseList() {
-        exerciseAdapter = ExerciseAdapter { index, completed ->
+        exerciseAdapter = ExerciseAdapter(viewModel, viewLifecycleOwner) { index, completed ->
             if (completed) completedExercises.add(index) else completedExercises.remove(index)
             updateProgress()
         }
@@ -217,7 +219,8 @@ class WorkoutFragment : Fragment() {
         viewModel.pauseWorkout()
         val elapsed = ((System.currentTimeMillis() - viewModel.workoutStartTime) / 1000 / 60).toInt().coerceAtLeast(1)
         val day = selectedWorkoutDay ?: return
-        val calories = day.caloriesBurned * elapsed / day.estimatedMinutes
+        val estimated = day.estimatedMinutes.coerceAtLeast(1)
+        val calories = (day.caloriesBurned.toFloat() * elapsed / estimated).toInt()
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.workout_complete_title)
@@ -245,14 +248,15 @@ class WorkoutFragment : Fragment() {
 // ─── IMPROVED EXERCISE ADAPTER ────────────────────────────────────────────────
 
 class ExerciseAdapter(
+    private val viewModel: WorkoutViewModel,
+    private val viewLifecycleOwner: androidx.lifecycle.LifecycleOwner,
     private val onToggle: (Int, Boolean) -> Unit
-) : RecyclerView.Adapter<ExerciseAdapter.ViewHolder>() {
+) : ListAdapter<Exercise, ExerciseAdapter.ViewHolder>(DIFF) {
 
-    private var exercises = listOf<Exercise>()
-
-    fun submitList(list: List<Exercise>) {
-        exercises = list
-        notifyDataSetChanged()
+    object DIFF : DiffUtil.ItemCallback<Exercise>() {
+        // Exercise has no stable id; name is unique inside a WorkoutDay.
+        override fun areItemsTheSame(oldItem: Exercise, newItem: Exercise) = oldItem.name == newItem.name
+        override fun areContentsTheSame(oldItem: Exercise, newItem: Exercise) = oldItem == newItem
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -275,8 +279,8 @@ class ExerciseAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val ex = exercises[position]
-        
+        val ex = getItem(position)
+
         holder.tvName.text = ex.name
         holder.tvMuscle.text = ex.muscleGroup.uppercase()
         holder.tvDifficulty.text = ex.difficulty
@@ -303,24 +307,81 @@ class ExerciseAdapter(
         }
         
         holder.btnProgress.setOnClickListener {
-            val progressMessage = if (ex.setsHistory.isEmpty()) {
-                "No history recorded for this exercise yet. Complete workouts to see your progress!"
-            } else {
-                buildString {
-                    appendLine("Recent performance:")
-                    ex.setsHistory.takeLast(5).forEach { record ->
-                        appendLine("• $record")
-                    }
-                }
-            }
-
-            MaterialAlertDialogBuilder(holder.itemView.context)
-                .setTitle("Progress: ${ex.name}")
-                .setMessage(progressMessage)
-                .setPositiveButton("Got it", null)
-                .show()
+            showTrackExerciseDialog(holder.itemView.context, ex)
         }
     }
 
-    override fun getItemCount() = exercises.size
+    // No need for getItemCount() — ListAdapter provides it from its backing list.
+
+    private fun showTrackExerciseDialog(context: android.content.Context, exercise: Exercise) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_track_exercise, null)
+        val tvTitle: TextView = dialogView.findViewById(R.id.tvDialogTitle)
+        val etWeight: EditText = dialogView.findViewById(R.id.etWeight)
+        val etSets: EditText = dialogView.findViewById(R.id.etSets)
+        val etReps: EditText = dialogView.findViewById(R.id.etReps)
+        val rvHistory: RecyclerView = dialogView.findViewById(R.id.rvExerciseHistory)
+
+        tvTitle.text = exercise.name
+        etSets.setText(exercise.sets.toString())
+        
+        // Use a simple number from reps if possible (e.g., "10-12" -> "12")
+        val defaultReps = exercise.reps.split("-").last().split(" ").first().filter { it.isDigit() }
+        etReps.setText(defaultReps)
+
+        val historyAdapter = ExerciseHistoryAdapter()
+        rvHistory.layoutManager = LinearLayoutManager(context)
+        rvHistory.adapter = historyAdapter
+
+        viewModel.getExerciseHistory(exercise.name).observe(viewLifecycleOwner) { history ->
+            historyAdapter.submitList(history)
+            if (history.isNotEmpty() && etWeight.text.isEmpty()) {
+                etWeight.setText(history.first().weightKg.toString())
+            }
+        }
+
+        MaterialAlertDialogBuilder(context)
+            .setView(dialogView)
+            .setPositiveButton("Save") { _, _ ->
+                val weight = etWeight.text.toString().toFloatOrNull() ?: 0f
+                val sets = etSets.text.toString().toIntOrNull() ?: 0
+                val reps = etReps.text.toString().toIntOrNull() ?: 0
+                if (weight > 0 && sets > 0 && reps > 0) {
+                    viewModel.logExercise(exercise.name, weight, reps, sets)
+                }
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+}
+
+class ExerciseHistoryAdapter :
+    ListAdapter<com.luigisworkout.data.database.entities.ExerciseLog, ExerciseHistoryAdapter.ViewHolder>(DIFF) {
+
+    object DIFF : DiffUtil.ItemCallback<com.luigisworkout.data.database.entities.ExerciseLog>() {
+        override fun areItemsTheSame(
+            oldItem: com.luigisworkout.data.database.entities.ExerciseLog,
+            newItem: com.luigisworkout.data.database.entities.ExerciseLog
+        ) = oldItem.id == newItem.id
+
+        override fun areContentsTheSame(
+            oldItem: com.luigisworkout.data.database.entities.ExerciseLog,
+            newItem: com.luigisworkout.data.database.entities.ExerciseLog
+        ) = oldItem == newItem
+    }
+
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val tvDate: TextView = view.findViewById(R.id.tvDate)
+        val tvPerformance: TextView = view.findViewById(R.id.tvPerformance)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_exercise_history, parent, false)
+        return ViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val log = getItem(position)
+        holder.tvDate.text = log.date
+        holder.tvPerformance.text = "${log.weightKg}kg • ${log.sets}x${log.reps}"
+    }
 }

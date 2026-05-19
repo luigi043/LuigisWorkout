@@ -7,7 +7,9 @@ import android.view.*
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
@@ -16,11 +18,10 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.luigisworkout.R
 import com.luigisworkout.data.database.entities.WeightLog
 import com.luigisworkout.databinding.FragmentProgressBinding
+import com.luigisworkout.luigiApp
 import com.luigisworkout.ui.logweight.LogWeightActivity
-import com.luigisworkout.viewmodel.AppViewModelFactory
 import com.luigisworkout.viewmodel.ProgressViewModel
-import java.text.SimpleDateFormat
-import java.util.*
+import com.luigisworkout.viewmodel.appViewModelFactory
 
 class ProgressFragment : Fragment() {
 
@@ -28,7 +29,7 @@ class ProgressFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: ProgressViewModel by activityViewModels {
-        AppViewModelFactory(requireActivity().application)
+        appViewModelFactory(requireActivity().luigiApp)
     }
 
     private lateinit var weightHistoryAdapter: WeightHistoryAdapter
@@ -186,9 +187,13 @@ class ProgressFragment : Fragment() {
         else
             String.format("+%.1f kg 📈", change)
 
-        val bmi = latest / (1.75f * 1.75f) // Assume 1.75m
+        val heightCm = viewModel.userProfile.value?.heightCm ?: 175f
+        val heightM = heightCm / 100f
+        val bmi = if (heightM > 0) latest / (heightM * heightM) else 0f
+        
         binding.tvCurrentBmi.text = String.format("%.1f", bmi)
         binding.tvBmiCategory.text = when {
+            bmi <= 0 -> "---"
             bmi < 18.5 -> "Abaixo do peso"
             bmi < 25 -> "Peso normal ✅"
             bmi < 30 -> "Excesso de peso"
@@ -210,16 +215,14 @@ class ProgressFragment : Fragment() {
 
 // ─── WEIGHT HISTORY ADAPTER ───────────────────────────────────────────────────
 
-class WeightHistoryAdapter : RecyclerView.Adapter<WeightHistoryAdapter.ViewHolder>() {
+class WeightHistoryAdapter : ListAdapter<WeightLog, WeightHistoryAdapter.ViewHolder>(DIFF) {
 
-    private var items = listOf<WeightLog>()
-
-    fun submitList(list: List<WeightLog>) {
-        items = list
-        notifyDataSetChanged()
+    object DIFF : DiffUtil.ItemCallback<WeightLog>() {
+        override fun areItemsTheSame(oldItem: WeightLog, newItem: WeightLog) = oldItem.id == newItem.id
+        override fun areContentsTheSame(oldItem: WeightLog, newItem: WeightLog) = oldItem == newItem
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvDate: TextView = view.findViewById(R.id.tvWeightDate)
         val tvWeight: TextView = view.findViewById(R.id.tvWeight)
         val tvBmi: TextView = view.findViewById(R.id.tvBmiValue)
@@ -232,7 +235,7 @@ class WeightHistoryAdapter : RecyclerView.Adapter<WeightHistoryAdapter.ViewHolde
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
+        val item = getItem(position)
         holder.tvDate.text = item.date
         holder.tvWeight.text = String.format("%.1f kg", item.weightKg)
         holder.tvBmi.text = "IMC: ${String.format("%.1f", item.bmi)}"
@@ -243,6 +246,4 @@ class WeightHistoryAdapter : RecyclerView.Adapter<WeightHistoryAdapter.ViewHolde
             holder.tvNote.visibility = View.GONE
         }
     }
-
-    override fun getItemCount() = items.size
 }

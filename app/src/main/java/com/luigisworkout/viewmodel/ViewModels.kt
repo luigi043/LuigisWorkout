@@ -1,136 +1,97 @@
 package com.luigisworkout.viewmodel
 
-import android.app.Application
 import androidx.lifecycle.*
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.luigisworkout.LuigisWorkoutApp
 import com.luigisworkout.data.AppContent
 import com.luigisworkout.data.WorkoutDay
 import com.luigisworkout.data.database.entities.*
 import com.luigisworkout.data.repository.AppRepository
+import com.luigisworkout.util.AppClock
+import com.luigisworkout.util.SingleLiveEvent
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
-// ─── SHARED APP VIEWMODEL ──────────────────────────────────────────────────────
-
-class AppViewModel(application: Application) : AndroidViewModel(application) {
-
-    val repository = AppRepository(application)
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-    fun today() = dateFormat.format(Date())
-
-    // User Profile
-    val userProfile: LiveData<UserProfile?> = repository.getUserProfile()
-
-    fun saveProfile(profile: UserProfile) = viewModelScope.launch {
-        repository.saveUserProfile(profile)
-    }
-
-    // Today's calories
-    val todayCalories: LiveData<Int?> = repository.getTodayCalories()
-
-    // Today's meals
-    fun getTodayMeals() = repository.getMealsByDate(today())
-
-    // Water tracking
-    val todayGoal: LiveData<DailyGoal?> = repository.getTodayGoal()
-
-    fun addWaterGlass() = viewModelScope.launch {
-        val current = todayGoal.value?.waterGlasses ?: 0
-        repository.updateWaterCount(current + 1)
-    }
-
-    fun removeWaterGlass() = viewModelScope.launch {
-        val current = todayGoal.value?.waterGlasses ?: 0
-        if (current > 0) repository.updateWaterCount(current - 1)
-    }
-
-    // Today's workout
-    val todayWorkout: LiveData<WorkoutLog?> = repository.getTodayWorkout()
-
-    // Weight
-    val latestWeight: LiveData<WeightLog?> = repository.getLatestWeight()
-
-    // Motivational tip
-    val dailyTip: String get() {
-        val dayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
-        return AppContent.motivationalTips[dayOfYear % AppContent.motivationalTips.size]
-    }
-
-    // Current workout plan day
-    fun getCurrentWorkoutDay(profile: UserProfile?): WorkoutDay? {
-        if (profile == null) return null
-        val weekNum = profile.currentWeekNumber.coerceIn(1, 12)
-        val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) // 1=Sunday
-        // Map day of week to workout day (1-5 depending on week)
-        val workoutDayNum = when (weekNum) {
-            in 1..4 -> ((dayOfWeek - 2).mod(7) % 3) + 1
-            in 5..8 -> ((dayOfWeek - 2).mod(7) % 4) + 1
-            else -> ((dayOfWeek - 2).mod(7) % 5) + 1
-        }
-        return AppContent.workoutPlan.firstOrNull {
-            it.weekNumber == weekNum && it.dayNumber == workoutDayNum
-        }
-    }
+// ─── FACTORY ──────────────────────────────────────────────────────────────────
+//
+// One factory for every ViewModel in the app. Built once from the application
+// singletons so each VM gets the shared [AppRepository] and the shared
+// "today" LiveData. Uses the modern `viewModelFactory` DSL — no deprecated
+// `create(Class<T>)` overload, no reflection.
+//
+fun appViewModelFactory(app: LuigisWorkoutApp): ViewModelProvider.Factory = viewModelFactory {
+    initializer { HomeViewModel(app.repository, app.todayDate) }
+    initializer { MealPlanViewModel(app.repository, app.todayDate) }
+    initializer { WorkoutViewModel(app.repository, app.todayDate) }
+    initializer { ProgressViewModel(app.repository) }
+    initializer { LogMealViewModel(app.repository) }
+    initializer { LogWeightViewModel(app.repository) }
 }
 
 // ─── HOME VIEWMODEL ───────────────────────────────────────────────────────────
 
-class HomeViewModel(application: Application) : AndroidViewModel(application) {
-    val repository = AppRepository(application)
+class HomeViewModel(
+    private val repository: AppRepository,
+    todayDate: LiveData<String>
+) : ViewModel() {
 
-    val todayCalories = repository.getTodayCalories()
-    val todayMeals = repository.getMealsByDate(repository.today())
-    val latestWeight = repository.getLatestWeight()
-    val todayGoal = repository.getTodayGoal()
-    val completedWorkouts = repository.getCompletedWorkoutsCount()
-    val todayWorkout = repository.getTodayWorkout()
-    val recentWeekWorkouts = repository.getRecentWeekWorkouts()
+    // Each "today" query re-issues when the device crosses midnight, so the
+    // counters can't get stuck on yesterday's data.
+    val todayMeals: LiveData<List<MealLog>> = todayDate.switchMap { repository.getMealsByDate(it) }
+    val todayCalories: LiveData<Int?> = todayDate.switchMap { repository.getCaloriesByDate(it) }
+    val todayGoal: LiveData<DailyGoal?> = todayDate.switchMap { repository.getGoalByDate(it) }
+    val todayWorkout: LiveData<WorkoutLog?> = todayDate.switchMap { repository.getWorkoutByDate(it) }
+
+    val latestWeight: LiveData<WeightLog?> = repository.getLatestWeight()
+    val completedWorkouts: LiveData<Int> = repository.getCompletedWorkoutsCount()
+    val recentWeekWorkouts: LiveData<List<WorkoutLog>> = repository.getRecentWeekWorkouts()
 
     private val _macros = MutableLiveData<Triple<Float, Float, Float>>()
     val macros: LiveData<Triple<Float, Float, Float>> = _macros
 
     fun refreshMacros() = viewModelScope.launch {
-        _macros.value = repository.getTodayMacros()
+        _macros.value = repository.getMacrosByDate(AppClock.todayString())
     }
 
-    fun addWater() = viewModelScope.launch {
-        val current = todayGoal.value?.waterGlasses ?: 0
-        repository.updateWaterCount(current + 1)
-    }
-
-    fun removeWater() = viewModelScope.launch {
-        val current = todayGoal.value?.waterGlasses ?: 0
-        if (current > 0) repository.updateWaterCount(current - 1)
-    }
+    fun addWater() = viewModelScope.launch { repository.adjustWaterCount(+1) }
+    fun removeWater() = viewModelScope.launch { repository.adjustWaterCount(-1) }
 }
 
 // ─── MEAL PLAN VIEWMODEL ──────────────────────────────────────────────────────
 
-class MealPlanViewModel(application: Application) : AndroidViewModel(application) {
-    val repository = AppRepository(application)
+class MealPlanViewModel(
+    private val repository: AppRepository,
+    todayDate: LiveData<String>
+) : ViewModel() {
 
     val breakfastRecipes = AppContent.recipes.filter { it.mealType == "breakfast" }
     val lunchRecipes = AppContent.recipes.filter { it.mealType == "lunch" }
     val dinnerRecipes = AppContent.recipes.filter { it.mealType == "dinner" }
     val snackRecipes = AppContent.recipes.filter { it.mealType == "snack" }
 
-    val todayMeals = repository.getMealsByDate(repository.today())
-    val todayCalories = repository.getTodayCalories()
-    val recentMeals = repository.getRecentMeals()
-
     val foodDatabase = AppContent.foodDatabase
+
+    val todayMeals: LiveData<List<MealLog>> = todayDate.switchMap { repository.getMealsByDate(it) }
+    val todayCalories: LiveData<Int?> = todayDate.switchMap { repository.getCaloriesByDate(it) }
+    val recentMeals: LiveData<List<MealLog>> = repository.getRecentMeals()
 
     fun deleteMeal(log: MealLog) = viewModelScope.launch { repository.deleteMeal(log) }
 
     suspend fun getRecentFoodNames() = repository.getRecentFoodNames()
 
-    // Shopping List
-    val shoppingItems = repository.getAllShoppingItems()
+    // Shopping list
+    val shoppingItems: LiveData<List<ShoppingItem>> = repository.getAllShoppingItems()
 
-    fun addShoppingItem(name: String, quantity: String = "", supermarket: String = "Any") = viewModelScope.launch {
-        repository.insertShoppingItem(ShoppingItem(name = name, quantity = quantity, supermarket = supermarket))
-    }
+    fun addShoppingItem(name: String, quantity: String = "", supermarket: String = "Any") =
+        viewModelScope.launch {
+            repository.insertShoppingItem(
+                ShoppingItem(name = name, quantity = quantity, supermarket = supermarket)
+            )
+        }
 
     fun toggleShoppingItem(item: ShoppingItem) = viewModelScope.launch {
         repository.updateShoppingItem(item.copy(isChecked = !item.isChecked))
@@ -147,45 +108,51 @@ class MealPlanViewModel(application: Application) : AndroidViewModel(application
 
 // ─── LOG MEAL VIEWMODEL ───────────────────────────────────────────────────────
 
-class LogMealViewModel(application: Application) : AndroidViewModel(application) {
-    val repository = AppRepository(application)
+class LogMealViewModel(
+    private val repository: AppRepository
+) : ViewModel() {
 
     val foodDatabase = AppContent.foodDatabase
 
-    private val _saved = MutableLiveData(false)
-    val saved: LiveData<Boolean> = _saved
+    /** One-shot: emits exactly once per save, then re-arms. Won't replay on rotate. */
+    val saved = SingleLiveEvent<Boolean>()
 
     fun saveMeal(log: MealLog) = viewModelScope.launch {
         repository.insertMeal(log)
-        _saved.value = true
+        saved.value = true
     }
 }
 
 // ─── WORKOUT VIEWMODEL ────────────────────────────────────────────────────────
 
-class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
-    val repository = AppRepository(application)
+class WorkoutViewModel(
+    private val repository: AppRepository,
+    todayDate: LiveData<String>
+) : ViewModel() {
 
-    val allWorkouts = repository.getAllWorkouts()
-    val completedCount = repository.getCompletedWorkoutsCount()
-    val recentWeek = repository.getRecentWeekWorkouts()
-    val todayWorkout = repository.getTodayWorkout()
+    val allWorkouts: LiveData<List<WorkoutLog>> = repository.getAllWorkouts()
+    val completedCount: LiveData<Int> = repository.getCompletedWorkoutsCount()
+    val recentWeek: LiveData<List<WorkoutLog>> = repository.getRecentWeekWorkouts()
+    val todayWorkout: LiveData<WorkoutLog?> = todayDate.switchMap { repository.getWorkoutByDate(it) }
 
     val fullPlan = AppContent.workoutPlan
 
-    // Timer state for persistence across configuration changes or tab switches
-    var isWorkoutActive = false
-    var workoutStartTime = 0L
-    private var timerJob: kotlinx.coroutines.Job? = null
-    private val _elapsedTime = MutableLiveData<String>()
+    // ─── Timer state (survives Fragment view recreation via the ViewModel) ───
+
+    var isWorkoutActive: Boolean = false
+        private set
+    var workoutStartTime: Long = 0L
+        private set
+
+    private var timerJob: Job? = null
+
+    private val _elapsedTime = MutableLiveData("⏱ 00:00")
     val elapsedTime: LiveData<String> = _elapsedTime
 
     fun startWorkout() {
         if (isWorkoutActive) return
         isWorkoutActive = true
-        if (workoutStartTime == 0L) {
-            workoutStartTime = System.currentTimeMillis()
-        }
+        if (workoutStartTime == 0L) workoutStartTime = System.currentTimeMillis()
         startTimer()
     }
 
@@ -195,21 +162,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun resumeWorkout() {
+        if (isWorkoutActive) return
         isWorkoutActive = true
         startTimer()
-    }
-
-    private fun startTimer() {
-        timerJob?.cancel()
-        timerJob = viewModelScope.launch {
-            while (isWorkoutActive) {
-                val elapsed = (System.currentTimeMillis() - workoutStartTime) / 1000
-                val minutes = elapsed / 60
-                val seconds = elapsed % 60
-                _elapsedTime.postValue(String.format(Locale.getDefault(), "⏱ %02d:%02d", minutes, seconds))
-                kotlinx.coroutines.delay(1000)
-            }
-        }
     }
 
     fun resetWorkout() {
@@ -219,103 +174,140 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         _elapsedTime.value = "⏱ 00:00"
     }
 
-    fun getWorkoutsByWeek(week: Int) = fullPlan.filter { it.weekNumber == week }
+    private fun startTimer() {
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            // viewModelScope runs on Main, so `value =` is safe and avoids the
+            // small postValue() coalescing delay that made the timer visibly jitter.
+            while (isWorkoutActive) {
+                val elapsed = (System.currentTimeMillis() - workoutStartTime) / 1000
+                val minutes = elapsed / 60
+                val seconds = elapsed % 60
+                _elapsedTime.value = String.format(Locale.getDefault(), "⏱ %02d:%02d", minutes, seconds)
+                delay(1000)
+            }
+        }
+    }
+
+    fun getWorkoutsByWeek(week: Int): List<WorkoutDay> = fullPlan.filter { it.weekNumber == week }
 
     fun logWorkout(
-        workoutDay: com.luigisworkout.data.WorkoutDay,
+        workoutDay: WorkoutDay,
         completedExercises: Int,
         minutes: Int
     ) = viewModelScope.launch {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val today = dateFormat.format(Date())
+        // Float math: previous int division would drop calories to 0 when the
+        // user finished much faster than the estimated duration.
+        val estimated = workoutDay.estimatedMinutes.coerceAtLeast(1)
+        val calories = (workoutDay.caloriesBurned.toFloat() * minutes / estimated).toInt()
         val log = WorkoutLog(
-            date = today,
+            date = AppClock.todayString(),
             workoutName = workoutDay.name,
             weekNumber = workoutDay.weekNumber,
             dayNumber = workoutDay.dayNumber,
             totalMinutes = minutes,
             exercisesCompleted = completedExercises,
             totalExercises = workoutDay.exercises.size,
-            caloriesBurned = workoutDay.caloriesBurned * minutes / workoutDay.estimatedMinutes,
+            caloriesBurned = calories,
             completed = completedExercises == workoutDay.exercises.size
         )
         repository.insertWorkout(log)
     }
+
+    fun logExercise(exerciseName: String, weightKg: Float, reps: Int, sets: Int) = viewModelScope.launch {
+        repository.insertExerciseLog(
+            ExerciseLog(
+                date = AppClock.todayString(),
+                exerciseName = exerciseName,
+                weightKg = weightKg,
+                reps = reps,
+                sets = sets
+            )
+        )
+    }
+
+    fun getExerciseHistory(exerciseName: String): LiveData<List<ExerciseLog>> =
+        repository.getExerciseHistory(exerciseName)
+
+    suspend fun getLatestExerciseLog(exerciseName: String) =
+        repository.getLatestExerciseLog(exerciseName)
 }
 
 // ─── PROGRESS VIEWMODEL ───────────────────────────────────────────────────────
 
-class ProgressViewModel(application: Application) : AndroidViewModel(application) {
-    val repository = AppRepository(application)
+class ProgressViewModel(
+    private val repository: AppRepository
+) : ViewModel() {
 
-    val allWeights = repository.getAllWeights()
-    val weightLast30Days = repository.getWeightByDateRange(repository.dateXDaysAgo(30))
+    val allWeights: LiveData<List<WeightLog>> = repository.getAllWeights()
+    val weightLast30Days: LiveData<List<WeightLog>> =
+        repository.getWeightByDateRange(repository.dateXDaysAgo(30))
     val caloriesLast30Days = repository.getCaloriesByDateRange(repository.dateXDaysAgo(30))
-    val completedWorkouts = repository.getCompletedWorkoutsCount()
-    val userProfile = repository.getUserProfile()
-
-    fun insertWeight(kg: Float, heightCm: Float, note: String = "") = viewModelScope.launch {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val today = dateFormat.format(Date())
-        val bmi = if (heightCm > 0) kg / ((heightCm / 100f) * (heightCm / 100f)) else 0f
-        repository.insertWeight(WeightLog(
-            date = today,
-            weightKg = kg,
-            bmi = bmi,
-            note = note
-        ))
-    }
-
-    fun deleteWeight(log: WeightLog) = viewModelScope.launch {
-        repository.deleteWeight(log)
-    }
+    val completedWorkouts: LiveData<Int> = repository.getCompletedWorkoutsCount()
+    val userProfile: LiveData<UserProfile?> = repository.getUserProfile()
 
     private val _totalCaloriesBurned = MutableLiveData(0)
     val totalCaloriesBurned: LiveData<Int> = _totalCaloriesBurned
 
+    fun insertWeight(kg: Float, heightCm: Float, note: String = "") = viewModelScope.launch {
+        val safeHeight = heightCm.takeIf { it > 0f } ?: 0f
+        val bmi = if (safeHeight > 0f) kg / ((safeHeight / 100f) * (safeHeight / 100f)) else 0f
+        repository.insertWeight(
+            WeightLog(
+                date = AppClock.todayString(),
+                weightKg = kg,
+                bmi = bmi,
+                note = note
+            )
+        )
+    }
+
+    fun deleteWeight(log: WeightLog) = viewModelScope.launch { repository.deleteWeight(log) }
+
     fun refreshStats() = viewModelScope.launch {
-        _totalCaloriesBurned.value = repository.getTotalCaloriesBurned()
+        _totalCaloriesBurned.value = repository.getTotalCaloriesBurnedLast30Days()
     }
 }
 
 // ─── LOG WEIGHT VIEWMODEL ────────────────────────────────────────────────────
 
-class LogWeightViewModel(application: Application) : AndroidViewModel(application) {
-    val repository = AppRepository(application)
+class LogWeightViewModel(
+    private val repository: AppRepository
+) : ViewModel() {
 
-    private val _saved = MutableLiveData(false)
-    val saved: LiveData<Boolean> = _saved
+    val saved = SingleLiveEvent<Boolean>()
 
     fun saveWeight(kg: Float, note: String = "") = viewModelScope.launch {
         val profile = repository.getUserProfileSync()
         val heightCm = profile?.heightCm ?: 170f
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val today = dateFormat.format(Date())
-        val bmi = kg / ((heightCm / 100f) * (heightCm / 100f))
-        repository.insertWeight(WeightLog(
-            date = today,
-            weightKg = kg,
-            bmi = bmi,
-            note = note
-        ))
-        _saved.value = true
+        val heightM = heightCm / 100f
+        val bmi = if (heightM > 0f) kg / (heightM * heightM) else 0f
+        repository.insertWeight(
+            WeightLog(
+                date = AppClock.todayString(),
+                weightKg = kg,
+                bmi = bmi,
+                note = note
+            )
+        )
+        saved.value = true
     }
 }
 
-// ─── VIEWMODEL FACTORY ────────────────────────────────────────────────────────
-
-class AppViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return when {
-            modelClass.isAssignableFrom(AppViewModel::class.java) -> AppViewModel(application) as T
-            modelClass.isAssignableFrom(HomeViewModel::class.java) -> HomeViewModel(application) as T
-            modelClass.isAssignableFrom(MealPlanViewModel::class.java) -> MealPlanViewModel(application) as T
-            modelClass.isAssignableFrom(WorkoutViewModel::class.java) -> WorkoutViewModel(application) as T
-            modelClass.isAssignableFrom(ProgressViewModel::class.java) -> ProgressViewModel(application) as T
-            modelClass.isAssignableFrom(LogMealViewModel::class.java) -> LogMealViewModel(application) as T
-            modelClass.isAssignableFrom(LogWeightViewModel::class.java) -> LogWeightViewModel(application) as T
-            else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
-        }
+// ─── WORKOUT-DAY MAPPING (formerly AppViewModel.getCurrentWorkoutDay) ─────────
+//
+// Pure function — no ViewModel state needed. Kept here so any screen can call it.
+//
+fun currentWorkoutDay(profile: UserProfile?): WorkoutDay? {
+    if (profile == null) return null
+    val weekNum = profile.currentWeekNumber.coerceIn(1, 12)
+    val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) // 1=Sunday
+    val workoutDayNum = when (weekNum) {
+        in 1..4 -> ((dayOfWeek - 2).mod(7) % 3) + 1
+        in 5..8 -> ((dayOfWeek - 2).mod(7) % 4) + 1
+        else -> ((dayOfWeek - 2).mod(7) % 5) + 1
+    }
+    return AppContent.workoutPlan.firstOrNull {
+        it.weekNumber == weekNum && it.dayNumber == workoutDayNum
     }
 }

@@ -4,17 +4,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.luigisworkout.R
 import com.luigisworkout.data.database.entities.WorkoutLog
 
-class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
+/**
+ * Workout history list. ListAdapter + DiffUtil gives us proper item-level animations
+ * and skips the O(n) rebind storm that notifyDataSetChanged caused on every insert.
+ */
+class HistoryAdapter : ListAdapter<WorkoutLog, HistoryAdapter.ViewHolder>(DIFF) {
 
-    private var logs = listOf<WorkoutLog>()
-
-    fun submitList(list: List<WorkoutLog>) {
-        logs = list
-        notifyDataSetChanged()
+    object DIFF : DiffUtil.ItemCallback<WorkoutLog>() {
+        override fun areItemsTheSame(oldItem: WorkoutLog, newItem: WorkoutLog) = oldItem.id == newItem.id
+        override fun areContentsTheSame(oldItem: WorkoutLog, newItem: WorkoutLog) = oldItem == newItem
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -30,13 +34,14 @@ class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val log = logs[position]
+        val log = getItem(position)
         val context = holder.itemView.context
         holder.tvDate.text = log.date
         holder.tvTitle.text = log.workoutName
-        holder.tvDetails.text = context.getString(R.string.workout_history_details, log.exercisesCompleted, log.totalExercises, log.totalMinutes)
+        holder.tvDetails.text = context.getString(
+            R.string.workout_history_details,
+            log.exercisesCompleted, log.totalExercises, log.totalMinutes
+        )
         holder.tvCalories.text = context.getString(R.string.calories_burned_unit, log.caloriesBurned)
     }
-
-    override fun getItemCount() = logs.size
 }

@@ -49,6 +49,19 @@ data class WorkoutLog(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+// ─── EXERCISE LOG ──────────────────────────────────────────────────────────────
+
+@Entity(tableName = "exercise_logs")
+data class ExerciseLog(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val date: String,
+    val exerciseName: String,
+    val weightKg: Float,
+    val reps: Int,
+    val sets: Int,
+    val timestamp: Long = System.currentTimeMillis()
+)
+
 // ─── USER PROFILE ──────────────────────────────────────────────────────────────
 
 @Entity(tableName = "user_profile")

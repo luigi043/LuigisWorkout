@@ -5,14 +5,15 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.luigisworkout.databinding.ActivityLogWeightBinding
-import com.luigisworkout.viewmodel.AppViewModelFactory
+import com.luigisworkout.luigiApp
 import com.luigisworkout.viewmodel.LogWeightViewModel
+import com.luigisworkout.viewmodel.appViewModelFactory
 
 class LogWeightActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLogWeightBinding
     private val viewModel: LogWeightViewModel by viewModels {
-        AppViewModelFactory(application)
+        appViewModelFactory(luigiApp)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
