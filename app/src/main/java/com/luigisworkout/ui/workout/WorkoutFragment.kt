@@ -18,6 +18,7 @@ import com.luigisworkout.data.Exercise
 import com.luigisworkout.data.WorkoutDay
 import com.luigisworkout.databinding.FragmentWorkoutBinding
 import com.luigisworkout.luigiApp
+import com.luigisworkout.util.MuscleWiki
 import com.luigisworkout.viewmodel.WorkoutViewModel
 import com.luigisworkout.viewmodel.appViewModelFactory
 
@@ -271,6 +272,7 @@ class ExerciseAdapter(
         val tvDesc: TextView = view.findViewById(R.id.tvExerciseDesc)
         val statusView: View = view.findViewById(R.id.viewStatus)
         val btnProgress: Button = view.findViewById(R.id.btnProgress)
+        val btnExample: Button = view.findViewById(R.id.btnExample)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -308,6 +310,12 @@ class ExerciseAdapter(
         
         holder.btnProgress.setOnClickListener {
             showTrackExerciseDialog(holder.itemView.context, ex)
+        }
+
+        holder.btnExample.setOnClickListener {
+            // Opens https://musclewiki.com/?s=<exercise name> in the user's browser.
+            // Search-based URL avoids hardcoding slugs that musclewiki may rename.
+            MuscleWiki.openExample(holder.itemView.context, ex.name)
         }
     }
 
