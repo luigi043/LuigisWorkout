@@ -112,6 +112,18 @@ interface WorkoutLogDao {
 
     @Query("SELECT * FROM workout_logs WHERE date >= :startDate ORDER BY date ASC")
     fun getRecentHeatmap(startDate: String): LiveData<List<WorkoutLog>>
+
+    /** Day numbers (1..N) already completed at least once for [week]. Live for UI. */
+    @Query("SELECT DISTINCT dayNumber FROM workout_logs WHERE weekNumber = :week AND completed = 1 ORDER BY dayNumber ASC")
+    fun getCompletedDayNumbersForWeekLive(week: Int): LiveData<List<Int>>
+
+    /** Same query, sync — used after an insert to decide whether to advance the week. */
+    @Query("SELECT DISTINCT dayNumber FROM workout_logs WHERE weekNumber = :week AND completed = 1 ORDER BY dayNumber ASC")
+    suspend fun getCompletedDayNumbersForWeekSync(week: Int): List<Int>
+
+    /** Most recent log for a given week + day, regardless of date. Null if never done. */
+    @Query("SELECT * FROM workout_logs WHERE weekNumber = :week AND dayNumber = :day ORDER BY timestamp DESC LIMIT 1")
+    fun getLatestLogForWeekDay(week: Int, day: Int): LiveData<WorkoutLog?>
 }
 
 // ─── USER PROFILE DAO ──────────────────────────────────────────────────────────

@@ -13,7 +13,6 @@ import com.luigisworkout.util.SingleLiveEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.Calendar
 import java.util.Locale
 
 // ─── FACTORY ──────────────────────────────────────────────────────────────────
@@ -134,8 +133,61 @@ class WorkoutViewModel(
     val completedCount: LiveData<Int> = repository.getCompletedWorkoutsCount()
     val recentWeek: LiveData<List<WorkoutLog>> = repository.getRecentWeekWorkouts()
     val todayWorkout: LiveData<WorkoutLog?> = todayDate.switchMap { repository.getWorkoutByDate(it) }
+    val userProfile: LiveData<UserProfile?> = repository.getUserProfile()
 
     val fullPlan = AppContent.workoutPlan
+
+    // ─── Reactive selection (drives "is this day already done?" lookups) ─────
+
+    private val _selectedWeek = MutableLiveData(1)
+    val selectedWeek: LiveData<Int> = _selectedWeek
+    private val _selectedDay = MutableLiveData(1)
+
+    fun selectWeek(week: Int) {
+        if (_selectedWeek.value != week) _selectedWeek.value = week
+    }
+
+    fun selectDay(day: Int) {
+        if (_selectedDay.value != day) _selectedDay.value = day
+    }
+
+    /** Distinct dayNumbers already completed at least once for the selected week. */
+    val completedDaysForSelectedWeek: LiveData<List<Int>> =
+        _selectedWeek.switchMap { repository.getCompletedDayNumbersForWeek(it) }
+
+    /** Most recent log for the currently selected (week, day). Null if never done. */
+    val selectedDayLog: LiveData<WorkoutLog?> = MediatorLiveData<WorkoutLog?>().also { mediator ->
+        var source: LiveData<WorkoutLog?>? = null
+        fun rebind() {
+            val w = _selectedWeek.value ?: return
+            val d = _selectedDay.value ?: return
+            source?.let(mediator::removeSource)
+            val next = repository.getLatestLogForWeekDay(w, d)
+            source = next
+            mediator.addSource(next) { mediator.value = it }
+        }
+        mediator.addSource(_selectedWeek) { rebind() }
+        mediator.addSource(_selectedDay) { rebind() }
+    }
+
+    /** Days completed / days planned for the user's *current* week (drives Home card). */
+    val currentWeekProgress: LiveData<Pair<Int, Int>> = MediatorLiveData<Pair<Int, Int>>().also { mediator ->
+        var doneSource: LiveData<List<Int>>? = null
+        fun rebind() {
+            val week = userProfile.value?.currentWeekNumber?.coerceIn(1, 12) ?: return
+            val total = repository.totalDaysInWeek(week)
+            doneSource?.let(mediator::removeSource)
+            val next = repository.getCompletedDayNumbersForWeek(week)
+            doneSource = next
+            mediator.addSource(next) { done ->
+                mediator.value = (done?.size ?: 0) to total
+            }
+        }
+        mediator.addSource(userProfile) { rebind() }
+    }
+
+    /** Fired exactly once when logWorkout pushes the user to a new week. */
+    val weekAdvanced = SingleLiveEvent<Int>()
 
     // ─── Timer state (survives Fragment view recreation via the ViewModel) ───
 
@@ -212,6 +264,12 @@ class WorkoutViewModel(
             completed = completedExercises == workoutDay.exercises.size
         )
         repository.insertWorkout(log)
+        // After saving, see whether this completes the user's current week.
+        // The repo bumps UserProfile.currentWeekNumber atomically and tells us
+        // the new week so the UI can celebrate.
+        repository.advanceWeekIfComplete()?.let { newWeek ->
+            weekAdvanced.value = newWeek
+        }
     }
 
     fun logExercise(exerciseName: String, weightKg: Float, reps: Int, sets: Int) = viewModelScope.launch {
@@ -294,20 +352,5 @@ class LogWeightViewModel(
     }
 }
 
-// ─── WORKOUT-DAY MAPPING (formerly AppViewModel.getCurrentWorkoutDay) ─────────
-//
-// Pure function — no ViewModel state needed. Kept here so any screen can call it.
-//
-fun currentWorkoutDay(profile: UserProfile?): WorkoutDay? {
-    if (profile == null) return null
-    val weekNum = profile.currentWeekNumber.coerceIn(1, 12)
-    val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) // 1=Sunday
-    val workoutDayNum = when (weekNum) {
-        in 1..4 -> ((dayOfWeek - 2).mod(7) % 3) + 1
-        in 5..8 -> ((dayOfWeek - 2).mod(7) % 4) + 1
-        else -> ((dayOfWeek - 2).mod(7) % 5) + 1
-    }
-    return AppContent.workoutPlan.firstOrNull {
-        it.weekNumber == weekNum && it.dayNumber == workoutDayNum
-    }
-}
+// (Removed currentWorkoutDay — its day-of-week-modulo math drifted out of sync
+// with the actual workoutPlan shape and the function had no live callers.)

@@ -2,6 +2,7 @@ package com.luigisworkout.data.repository
 
 import android.content.Context
 import androidx.lifecycle.LiveData
+import com.luigisworkout.data.AppContent
 import com.luigisworkout.data.database.AppDatabase
 import com.luigisworkout.data.database.dao.DateCalories
 import com.luigisworkout.data.database.entities.*
@@ -89,6 +90,42 @@ class AppRepository(context: Context) {
 
     suspend fun getTotalCaloriesBurnedLast30Days(): Int = withContext(Dispatchers.IO) {
         workoutLogDao.getTotalCaloriesBurned(dateXDaysAgo(30)) ?: 0
+    }
+
+    fun getCompletedDayNumbersForWeek(week: Int): LiveData<List<Int>> =
+        workoutLogDao.getCompletedDayNumbersForWeekLive(week)
+
+    fun getLatestLogForWeekDay(week: Int, day: Int): LiveData<WorkoutLog?> =
+        workoutLogDao.getLatestLogForWeekDay(week, day)
+
+    fun totalDaysInWeek(week: Int): Int = AppContent.workoutPlan.count { it.weekNumber == week }
+
+    /**
+     * Called right after a successful `insertWorkout`. If every day in the user's
+     * current week now has at least one completed log, bumps `currentWeekNumber` to
+     * the next week and returns it. Returns null if the week isn't done yet or we
+     * already finished week 12.
+     */
+    suspend fun advanceWeekIfComplete(): Int? = withContext(Dispatchers.IO) {
+        val profile = userProfileDao.getSync() ?: run {
+            // Bootstrap a default profile so the user always has one to advance.
+            val seed = UserProfile()
+            userProfileDao.insert(seed)
+            seed
+        }
+        val currentWeek = profile.currentWeekNumber.coerceIn(1, 12)
+        val totalDays = totalDaysInWeek(currentWeek)
+        if (totalDays == 0) return@withContext null
+        val doneDays = workoutLogDao.getCompletedDayNumbersForWeekSync(currentWeek).distinct()
+        if (doneDays.size >= totalDays && currentWeek < 12) {
+            val next = currentWeek + 1
+            userProfileDao.update(profile.copy(
+                currentWeekNumber = next,
+                updatedAt = System.currentTimeMillis()
+            ))
+            return@withContext next
+        }
+        null
     }
 
     // ─── USER PROFILE ──────────────────────────────────────────────────────────────

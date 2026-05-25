@@ -20,6 +20,7 @@ import com.luigisworkout.ui.logmeal.LogMealActivity
 import com.luigisworkout.ui.logweight.LogWeightActivity
 import com.luigisworkout.util.AppClock
 import com.luigisworkout.viewmodel.HomeViewModel
+import com.luigisworkout.viewmodel.WorkoutViewModel
 import com.luigisworkout.viewmodel.appViewModelFactory
 import java.util.Calendar
 
@@ -29,6 +30,12 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: HomeViewModel by activityViewModels {
+        appViewModelFactory(requireActivity().luigiApp)
+    }
+
+    // Shared with WorkoutFragment so the Home "Current Plan" card and the workout
+    // chips reflect the same week-progress state without duplicating the math.
+    private val workoutViewModel: WorkoutViewModel by activityViewModels {
         appViewModelFactory(requireActivity().luigiApp)
     }
 
@@ -171,6 +178,22 @@ class HomeFragment : Fragment() {
 
         viewModel.latestWeight.observe(viewLifecycleOwner) { weight ->
             binding.tvCurrentWeight.text = weight?.weightKg?.let { String.format("%.1f", it) } ?: "--.-"
+        }
+
+        // Current Plan card — pulls from WorkoutViewModel so Home and Workout always
+        // agree on how far through the week the user is.
+        workoutViewModel.userProfile.observe(viewLifecycleOwner) { profile ->
+            val week = (profile?.currentWeekNumber ?: 1).coerceIn(1, 12)
+            binding.tvHomeWeekLabel.text = getString(R.string.week_format, week)
+        }
+        workoutViewModel.currentWeekProgress.observe(viewLifecycleOwner) { (done, total) ->
+            binding.tvHomeWeekProgress.text = if (total > 0) {
+                "$done of $total days done this week"
+            } else {
+                "Plan loading…"
+            }
+            binding.progressHomeWeek.max = total.coerceAtLeast(1)
+            binding.progressHomeWeek.setProgressCompat(done.coerceIn(0, total), true)
         }
 
         // Pull the daily tip from AppContent so we have one source of truth, not a

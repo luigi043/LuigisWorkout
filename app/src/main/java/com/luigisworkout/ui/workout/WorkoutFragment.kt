@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.luigisworkout.R
@@ -33,8 +34,13 @@ class WorkoutFragment : Fragment() {
 
     private lateinit var exerciseAdapter: ExerciseAdapter
     private lateinit var historyAdapter: HistoryAdapter
+
     private var selectedWorkoutDay: WorkoutDay? = null
     private var completedExercises = mutableSetOf<Int>()
+    private var isCurrentDayDone: Boolean = false
+
+    /** Cached so the chip row is only rebuilt when the underlying list actually changes. */
+    private var lastChipSignature: Triple<Int, List<Int>, Set<Int>>? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentWorkoutBinding.inflate(inflater, container, false)
@@ -50,14 +56,14 @@ class WorkoutFragment : Fragment() {
         setupObservers()
         setupClickListeners()
 
-        // Restore UI if workout is already running
         if (viewModel.isWorkoutActive) {
             binding.tvElapsedTime.visibility = View.VISIBLE
             binding.btnStartWorkout.text = getString(R.string.pause_workout)
         }
-        
-        // Initial animation
-        binding.root.layoutAnimation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_animation_fall_down)
+
+        binding.root.layoutAnimation = AnimationUtils.loadLayoutAnimation(
+            requireContext(), R.anim.layout_animation_fall_down
+        )
     }
 
     private fun setupTabs() {
@@ -85,55 +91,25 @@ class WorkoutFragment : Fragment() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerWeek.adapter = adapter
 
+        // Default to the user's current week the first time we have a profile.
+        viewModel.userProfile.observe(viewLifecycleOwner) { profile ->
+            val week = (profile?.currentWeekNumber ?: 1).coerceIn(1, 12)
+            if (binding.spinnerWeek.selectedItemPosition != week - 1) {
+                binding.spinnerWeek.setSelection(week - 1)
+            }
+        }
+
         binding.spinnerWeek.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                loadWeekWorkouts(position + 1)
+                viewModel.selectWeek(position + 1)
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-    }
-
-    private fun loadWeekWorkouts(week: Int) {
-        val workouts = viewModel.getWorkoutsByWeek(week)
-        val dayNames = workouts.map { getString(R.string.day_format, it.dayNumber, it.name) }
-
-        val dayAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, dayNames)
-        dayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerDay.adapter = dayAdapter
-
-        binding.spinnerDay.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (workouts.isNotEmpty() && position < workouts.size) {
-                    loadWorkoutDay(workouts[position])
-                }
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
-        if (workouts.isNotEmpty()) loadWorkoutDay(workouts[0])
-    }
-
-    private fun loadWorkoutDay(day: WorkoutDay) {
-        selectedWorkoutDay = day
-        completedExercises.clear()
-        
-        if (!viewModel.isWorkoutActive) {
-            viewModel.resetWorkout()
-            binding.tvElapsedTime.visibility = View.GONE
-        }
-
-        binding.tvWorkoutTitle.text = day.name
-        binding.tvWorkoutProgress.text = getString(R.string.exercises_count_format, 0, day.exercises.size)
-        
-        exerciseAdapter.submitList(day.exercises)
-        binding.rvExercises.scheduleLayoutAnimation()
-
-        updateProgress()
-        updateStartButton()
     }
 
     private fun setupExerciseList() {
         exerciseAdapter = ExerciseAdapter(viewModel, viewLifecycleOwner) { index, completed ->
+            if (isCurrentDayDone) return@ExerciseAdapter // checks are read-only on done days
             if (completed) completedExercises.add(index) else completedExercises.remove(index)
             updateProgress()
         }
@@ -152,15 +128,137 @@ class WorkoutFragment : Fragment() {
             historyAdapter.submitList(logs)
         }
 
-        viewModel.todayWorkout.observe(viewLifecycleOwner) { log ->
-            if (log?.completed == true) {
-                binding.btnStartWorkout.text = getString(R.string.done_today)
-                binding.btnStartWorkout.isEnabled = false
-            }
+        // (Re)build the day-chip row whenever the selected week or its completion
+        // set changes. We diff a Triple signature so we don't rebuild on every emit.
+        viewModel.selectedWeek.observe(viewLifecycleOwner) { week ->
+            rebuildDayChipsIfNeeded(week, viewModel.completedDaysForSelectedWeek.value ?: emptyList())
+        }
+        viewModel.completedDaysForSelectedWeek.observe(viewLifecycleOwner) { doneDays ->
+            val week = viewModel.selectedWeek.value ?: 1
+            rebuildDayChipsIfNeeded(week, doneDays)
+            renderWeekProgress(week, doneDays.size)
+        }
+
+        // When the selected (week, day) lands on a previously-logged day, pre-tick
+        // every exercise and switch the action row into "Done / Redo" mode.
+        viewModel.selectedDayLog.observe(viewLifecycleOwner) { log ->
+            val done = log?.completed == true
+            isCurrentDayDone = done
+            applyDoneState(done)
         }
 
         viewModel.elapsedTime.observe(viewLifecycleOwner) { time ->
             binding.tvElapsedTime.text = time
+        }
+
+        viewModel.weekAdvanced.observe(viewLifecycleOwner) { newWeek ->
+            val justFinished = newWeek - 1
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.week_complete_title, justFinished))
+                .setMessage(getString(R.string.week_complete_msg, justFinished, newWeek))
+                .setPositiveButton(R.string.onward) { _, _ ->
+                    // Jump the spinner to the new week so the next workout is one tap away.
+                    binding.spinnerWeek.setSelection(newWeek - 1)
+                }
+                .setCancelable(false)
+                .show()
+        }
+    }
+
+    /** Rebuilds the horizontal day chips for [week] from the planned days + [doneDays]. */
+    private fun rebuildDayChipsIfNeeded(week: Int, doneDays: List<Int>) {
+        val workouts = viewModel.getWorkoutsByWeek(week)
+        val planSignature = workouts.map { it.dayNumber }
+        val doneSet = doneDays.toSet()
+        val signature = Triple(week, planSignature, doneSet)
+        if (signature == lastChipSignature) return
+        lastChipSignature = signature
+
+        binding.chipGroupDays.removeAllViews()
+        if (workouts.isEmpty()) return
+
+        workouts.forEach { day ->
+            val isDone = day.dayNumber in doneSet
+            val chip = Chip(requireContext()).apply {
+                text = if (isDone) getString(R.string.day_done_chip, day.dayNumber)
+                       else getString(R.string.day_chip, day.dayNumber)
+                isCheckable = true
+                isClickable = true
+                isCheckedIconVisible = false
+                id = View.generateViewId()
+                setOnClickListener {
+                    if (isChecked) {
+                        viewModel.selectDay(day.dayNumber)
+                        loadWorkoutDay(day)
+                    }
+                }
+            }
+            binding.chipGroupDays.addView(chip)
+        }
+
+        // Preserve the previously-selected day if it still exists in this week,
+        // otherwise default to the first not-yet-done day, otherwise day 1.
+        val preferredDay = workouts.firstOrNull { it.dayNumber !in doneSet }?.dayNumber
+            ?: workouts.first().dayNumber
+        val target = workouts.firstOrNull { it.dayNumber == (selectedWorkoutDay?.dayNumber ?: preferredDay) }
+            ?: workouts.first()
+        binding.chipGroupDays.children().forEachIndexed { i, chip ->
+            (chip as Chip).isChecked = workouts[i].dayNumber == target.dayNumber
+        }
+        viewModel.selectDay(target.dayNumber)
+        loadWorkoutDay(target)
+    }
+
+    private fun renderWeekProgress(week: Int, doneCount: Int) {
+        val total = viewModel.getWorkoutsByWeek(week).size
+        binding.tvWeekProgress.text = getString(R.string.week_progress_format, week, doneCount, total)
+        binding.progressWeek.max = total.coerceAtLeast(1)
+        binding.progressWeek.setProgressCompat(doneCount.coerceIn(0, total), true)
+    }
+
+    private fun loadWorkoutDay(day: WorkoutDay) {
+        selectedWorkoutDay = day
+        completedExercises.clear()
+
+        if (!viewModel.isWorkoutActive) {
+            viewModel.resetWorkout()
+            binding.tvElapsedTime.visibility = View.GONE
+        }
+
+        binding.tvWorkoutTitle.text = day.name
+        binding.tvWorkoutProgress.text = getString(R.string.exercises_count_format, 0, day.exercises.size)
+
+        exerciseAdapter.setAllPreChecked(false)
+        exerciseAdapter.submitList(day.exercises)
+        binding.rvExercises.scheduleLayoutAnimation()
+
+        updateProgress()
+        updateStartButton()
+    }
+
+    /** Drives the "this day is already done" presentation. */
+    private fun applyDoneState(done: Boolean) {
+        binding.tvDoneBadge.isVisible = done
+        binding.btnRedoDay.isVisible = done
+
+        if (done) {
+            val day = selectedWorkoutDay
+            if (day != null) {
+                // Mark every exercise as checked in our tracking set so progress UI agrees.
+                completedExercises.clear()
+                completedExercises.addAll(day.exercises.indices)
+                exerciseAdapter.setAllPreChecked(true)
+                exerciseAdapter.notifyItemRangeChanged(0, day.exercises.size)
+            }
+            binding.btnStartWorkout.isEnabled = false
+            binding.btnStartWorkout.text = getString(R.string.done_today)
+            binding.btnFinishWorkout.visibility = View.GONE
+            binding.progressWorkout.setProgress(
+                selectedWorkoutDay?.exercises?.size ?: 0, true
+            )
+        } else {
+            exerciseAdapter.setAllPreChecked(false)
+            updateStartButton()
         }
     }
 
@@ -171,15 +269,17 @@ class WorkoutFragment : Fragment() {
         binding.progressWorkout.setProgress(done, true)
         binding.tvWorkoutProgress.text = getString(R.string.exercises_count_format, done, total)
 
-        if (done == total && total > 0) {
+        // The Finish button only appears for an in-progress (not-yet-done) day.
+        if (!isCurrentDayDone && done == total && total > 0) {
             binding.btnFinishWorkout.visibility = View.VISIBLE
             binding.btnFinishWorkout.animate().alpha(1f).setDuration(300).start()
-        } else {
+        } else if (!isCurrentDayDone) {
             binding.btnFinishWorkout.visibility = View.GONE
         }
     }
 
     private fun updateStartButton() {
+        if (isCurrentDayDone) return // applyDoneState owns the buttons in this case
         if (!viewModel.isWorkoutActive) {
             binding.btnStartWorkout.text = getString(R.string.start_workout)
             binding.btnStartWorkout.isEnabled = true
@@ -191,15 +291,21 @@ class WorkoutFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.btnStartWorkout.setOnClickListener {
-            if (!viewModel.isWorkoutActive) {
-                startWorkout()
-            } else {
-                pauseWorkout()
-            }
+            if (isCurrentDayDone) return@setOnClickListener
+            if (!viewModel.isWorkoutActive) startWorkout() else pauseWorkout()
         }
-
-        binding.btnFinishWorkout.setOnClickListener {
-            finishWorkout()
+        binding.btnFinishWorkout.setOnClickListener { finishWorkout() }
+        binding.btnRedoDay.setOnClickListener {
+            // Optimistic UI reset — the underlying logs stay, but the user gets a
+            // fresh attempt. Re-completing the day inserts another WorkoutLog row.
+            isCurrentDayDone = false
+            binding.tvDoneBadge.isVisible = false
+            binding.btnRedoDay.isVisible = false
+            completedExercises.clear()
+            exerciseAdapter.setAllPreChecked(false)
+            selectedWorkoutDay?.exercises?.size?.let { exerciseAdapter.notifyItemRangeChanged(0, it) }
+            updateProgress()
+            updateStartButton()
         }
     }
 
@@ -233,6 +339,11 @@ class WorkoutFragment : Fragment() {
                 binding.btnStartWorkout.isEnabled = false
                 binding.btnFinishWorkout.visibility = View.GONE
                 binding.tvElapsedTime.visibility = View.GONE
+                // The selectedDayLog observer will flip us into done-state once the
+                // insert lands in Room; in the meantime show the badge optimistically.
+                binding.tvDoneBadge.isVisible = true
+                binding.btnRedoDay.isVisible = true
+                isCurrentDayDone = true
             }
             .setNegativeButton(R.string.discard) { _, _ ->
                 viewModel.resumeWorkout()
@@ -246,7 +357,12 @@ class WorkoutFragment : Fragment() {
     }
 }
 
-// ─── IMPROVED EXERCISE ADAPTER ────────────────────────────────────────────────
+/** Small helper to iterate a ViewGroup's children without pulling in core-ktx. */
+private fun ViewGroup.children(): Sequence<View> = sequence {
+    for (i in 0 until childCount) yield(getChildAt(i))
+}
+
+// ─── EXERCISE ADAPTER ─────────────────────────────────────────────────────────
 
 class ExerciseAdapter(
     private val viewModel: WorkoutViewModel,
@@ -255,9 +371,17 @@ class ExerciseAdapter(
 ) : ListAdapter<Exercise, ExerciseAdapter.ViewHolder>(DIFF) {
 
     object DIFF : DiffUtil.ItemCallback<Exercise>() {
-        // Exercise has no stable id; name is unique inside a WorkoutDay.
         override fun areItemsTheSame(oldItem: Exercise, newItem: Exercise) = oldItem.name == newItem.name
         override fun areContentsTheSame(oldItem: Exercise, newItem: Exercise) = oldItem == newItem
+    }
+
+    /** When true, every row binds pre-checked + disabled to reflect a logged day. */
+    private var preCheckedAll: Boolean = false
+
+    fun setAllPreChecked(value: Boolean) {
+        if (preCheckedAll != value) {
+            preCheckedAll = value
+        }
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -290,12 +414,14 @@ class ExerciseAdapter(
         holder.tvReps.text = ex.reps
         holder.tvRest.text = "${ex.restSeconds}s"
         holder.tvDesc.text = ex.description
-        
-        // Reset state
+
+        // Detach the listener before mutating state — otherwise recycled checkboxes
+        // can fire toggle callbacks with stale positions.
         holder.checkBox.setOnCheckedChangeListener(null)
-        holder.checkBox.isChecked = false
-        holder.statusView.visibility = View.INVISIBLE
-        holder.card.alpha = 1.0f
+        holder.checkBox.isChecked = preCheckedAll
+        holder.checkBox.isEnabled = !preCheckedAll
+        holder.statusView.visibility = if (preCheckedAll) View.VISIBLE else View.INVISIBLE
+        holder.card.alpha = if (preCheckedAll) 0.6f else 1.0f
 
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
             onToggle(position, isChecked)
@@ -307,19 +433,16 @@ class ExerciseAdapter(
                 holder.statusView.visibility = View.INVISIBLE
             }
         }
-        
+
         holder.btnProgress.setOnClickListener {
             showTrackExerciseDialog(holder.itemView.context, ex)
         }
 
         holder.btnExample.setOnClickListener {
             // Opens https://musclewiki.com/?s=<exercise name> in the user's browser.
-            // Search-based URL avoids hardcoding slugs that musclewiki may rename.
             MuscleWiki.openExample(holder.itemView.context, ex.name)
         }
     }
-
-    // No need for getItemCount() — ListAdapter provides it from its backing list.
 
     private fun showTrackExerciseDialog(context: android.content.Context, exercise: Exercise) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_track_exercise, null)
@@ -331,8 +454,7 @@ class ExerciseAdapter(
 
         tvTitle.text = exercise.name
         etSets.setText(exercise.sets.toString())
-        
-        // Use a simple number from reps if possible (e.g., "10-12" -> "12")
+
         val defaultReps = exercise.reps.split("-").last().split(" ").first().filter { it.isDigit() }
         etReps.setText(defaultReps)
 

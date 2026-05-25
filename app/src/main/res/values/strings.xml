@@ -54,6 +54,15 @@
     <string name="save_result">Save Result</string>
     <string name="discard">Discard</string>
     <string name="done_today">Done for Today! ✅</string>
+    <string name="day_done_chip">Day %1$d ✓</string>
+    <string name="day_chip">Day %1$d</string>
+    <string name="week_progress_format">Week %1$d · %2$d of %3$d days done</string>
+    <string name="day_already_done">Already done — tap Redo to repeat</string>
+    <string name="redo_day">Redo</string>
+    <string name="week_complete_title">Week %1$d complete! 🏆</string>
+    <string name="week_complete_msg">Amazing work, Luigi. You crushed every day of week %1$d. The plan just bumped you to Week %2$d — let\'s keep the streak going.</string>
+    <string name="onward">Onward 🚀</string>
+    <string name="home_current_week">Current Plan</string>
     <string name="calories_burned_unit">%1$d kcal</string>
     <string name="calories_unit">%1$d kcal</string>
     <string name="consumed_today_label">CONSUMED TODAY</string>
