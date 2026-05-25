@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingVertical="8dp"
+    android:paddingVertical="@dimen/spacing_sm"
     android:gravity="center_vertical">
 
     <TextView
@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="2024-05-20"
-        android:textSize="12sp"
+        android:textSize="@dimen/text_sm"
         android:textColor="@color/text_secondary" />
 
     <TextView
@@ -20,8 +20,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="60kg • 3x12"
-        android:textSize="14sp"
+        android:textSize="@dimen/text_md"
         android:textStyle="bold"
-        android:textColor="@color/text_primary" />
+        android:textColor="@color/primary" />
 
 </LinearLayout>
