@@ -123,6 +123,4 @@
         <item name="android:textColor">@color/text_primary</item>
         <item name="chipBackgroundColor">@color/surface_variant</item>
         <item name="chipStrokeColor">@color/primary_light</item>
-        <item name="chipStrokeWidth">1dp</item>
-    </style>
-</resources>
+        <item name="

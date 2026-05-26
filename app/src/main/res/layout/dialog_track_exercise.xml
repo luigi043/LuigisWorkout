@@ -79,14 +79,4 @@
         android:textSize="@dimen/text_sm"
         android:textStyle="bold"
         android:textColor="@color/primary"
-        android:layout_marginBottom="@dimen/spacing_xs"
-        android:letterSpacing="0.1"
-        android:textAllCaps="true" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvExerciseHistory"
-        android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:overScrollMode="never" />
-
-</LinearLayout>
+        android:layout_marginBottom="@dimen/spacing_

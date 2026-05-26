@@ -240,11 +240,4 @@
 
         <!-- HISTORY SECTION -->
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvWorkoutHistory"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            android:padding="@dimen/spacing_md" />
-
-    </FrameLayout>
-</LinearLayout>
+            android:id=
