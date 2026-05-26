@@ -59,6 +59,7 @@ class MealPlanFragment : Fragment() {
             getString(R.string.tab_lunch),
             getString(R.string.tab_dinner),
             getString(R.string.tab_snack),
+            getString(R.string.tab_drinks),
             getString(R.string.tab_history_label)
         )
         tabs.forEach { title ->
@@ -103,7 +104,8 @@ class MealPlanFragment : Fragment() {
     }
 
     private fun updateContent() {
-        val showRecipes = currentTab < 4
+        // Tabs 0..4 are recipe categories, tab 5 is history.
+        val showRecipes = currentTab < 5
         binding.rvRecipes.visibility = if (showRecipes) View.VISIBLE else View.GONE
         binding.historyContainer.visibility = if (!showRecipes) View.VISIBLE else View.GONE
 
@@ -113,6 +115,7 @@ class MealPlanFragment : Fragment() {
                 1 -> viewModel.lunchRecipes
                 2 -> viewModel.dinnerRecipes
                 3 -> viewModel.snackRecipes
+                4 -> viewModel.drinkRecipes
                 else -> emptyList()
             }
             recipeAdapter.submitList(recipes)
@@ -122,9 +125,15 @@ class MealPlanFragment : Fragment() {
     private fun showRecipeDetail(recipe: Recipe) {
         val message = buildString {
             appendLine("🔥 ${recipe.calories} kcal  |  💪 ${recipe.protein.toInt()}g Protein")
+            if (recipe.suggestedTime.isNotEmpty()) appendLine("🕐 Best around ${recipe.suggestedTime}")
             appendLine("⏱ ${recipe.prepMinutes} min prep time")
             appendLine()
-            appendLine("🛒 Buy at: ${recipe.supermarket}")
+            val costSuffix = if (recipe.approxCostEuro > 0f) " · ≈ €%.2f / serving".format(recipe.approxCostEuro) else ""
+            appendLine("🛒 Buy at: ${recipe.supermarket}$costSuffix")
+            if (recipe.supplementNote.isNotEmpty()) {
+                appendLine()
+                appendLine("💊 ${recipe.supplementNote}")
+            }
             appendLine()
             appendLine("📦 Ingredients:")
             recipe.ingredients.forEach { appendLine("  • $it") }
@@ -217,8 +226,17 @@ class RecipeAdapter(
         val recipe = getItem(position)
         holder.tvName.text = recipe.name
         holder.tvCalories.text = "${recipe.calories} kcal"
-        holder.tvTime.text = "⏱ ${recipe.prepMinutes} min"
-        holder.tvSupermarket.text = "🛒 ${recipe.supermarket}"
+        // Prepend the suggested meal time (e.g. "🕐 13:00 · ⏱ 20 min") so the user
+        // can see at a glance which slot of the day a recipe fits into.
+        holder.tvTime.text = if (recipe.suggestedTime.isNotEmpty())
+            "🕐 ${recipe.suggestedTime} · ⏱ ${recipe.prepMinutes} min"
+        else
+            "⏱ ${recipe.prepMinutes} min"
+        // If we know a per-serving cost, surface it next to the supermarket.
+        holder.tvSupermarket.text = if (recipe.approxCostEuro > 0f)
+            "🛒 ${recipe.supermarket} · €%.2f".format(recipe.approxCostEuro)
+        else
+            "🛒 ${recipe.supermarket}"
         holder.chipProtein.text = "${recipe.protein.toInt()}g P"
         holder.chipCarbs.text = "${recipe.carbs.toInt()}g C"
         holder.chipFat.text = "${recipe.fat.toInt()}g F"

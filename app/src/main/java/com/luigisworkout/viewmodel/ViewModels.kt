@@ -71,6 +71,10 @@ class MealPlanViewModel(
     val lunchRecipes = AppContent.recipes.filter { it.mealType == "lunch" }
     val dinnerRecipes = AppContent.recipes.filter { it.mealType == "dinner" }
     val snackRecipes = AppContent.recipes.filter { it.mealType == "snack" }
+    val drinkRecipes = AppContent.recipes.filter { it.mealType == "drink" }
+
+    /** Daily meal schedule — exposed for UI hints (which slot are we in right now?). */
+    val mealSchedule = AppContent.mealSchedule
 
     val foodDatabase = AppContent.foodDatabase
 
