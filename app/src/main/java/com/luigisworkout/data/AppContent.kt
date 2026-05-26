@@ -5,7 +5,7 @@ package com.luigisworkout.data
 data class Recipe(
     val id: String,
     val name: String,
-    val mealType: String,       // breakfast, lunch, dinner, snack, dessert, pre-workout, post-workout
+    val mealType: String,       // breakfast, lunch, dinner, snack, drink
     val calories: Int,
     val protein: Float,
     val carbs: Float,
@@ -14,9 +14,19 @@ data class Recipe(
     val servings: Int = 1,
     val ingredients: List<String>,
     val steps: List<String>,
-    val supermarket: String,    
+    val supermarket: String,
     val tags: List<String> = emptyList(),
-    val cheapestAt: String = "Any"
+    val cheapestAt: String = "Any",
+    val suggestedTime: String = "",         // "HH:mm" — when in the day to eat this
+    val approxCostEuro: Float = 0f,          // per serving, € · 0 = unknown
+    val supplementNote: String = ""          // e.g. "Take 5g creatine with this meal"
+)
+
+/** A point in the user's daily meal schedule. */
+data class MealSlot(
+    val label: String,          // human-readable, e.g. "Late Snack + Creatine"
+    val time: String,           // "HH:mm"
+    val mealType: String        // matches Recipe.mealType so we can filter
 )
 
 data class Exercise(
@@ -60,302 +70,499 @@ object AppContent {
 
     val recipes = listOf(
 
-        // ── BREAKFASTS ──────────────────────────────────────────────────
+        // ════════════════════════════════════════════════════════════════════
+        // Budget-Bytes-style fat-loss menu for a 115 kg user on a 5-meal day:
+        //   07:30  Breakfast    — protein + slow carbs
+        //   09:00  Morning snack — protein top-up, easy to grab
+        //   13:00  Lunch         — the big meal (salad / pasta / chicken / pizza)
+        //   19:00  Dinner        — lean protein + veg, lower carbs
+        //   20:00  Late snack    — slow-digesting protein + creatine window
+        //
+        // Costs are rough per-serving in € based on Lidl / Pingo Doce / Aldi
+        // basics. Recipes scale linearly — meal-prep 3-4 servings at once.
+        // ════════════════════════════════════════════════════════════════════
+
+        // ── 07:30 · BREAKFAST ─────────────────────────────────────────────
         Recipe(
-            id = "br_01",
-            name = "Banana & Honey Oatmeal",
+            id = "br_protein_oats",
+            name = "Protein Oats Bowl",
             mealType = "breakfast",
-            calories = 340,
-            protein = 12f, carbs = 58f, fat = 6f,
+            calories = 460, protein = 35f, carbs = 58f, fat = 10f,
             prepMinutes = 5,
-            ingredients = listOf("60g oats", "250ml milk", "1 banana", "1 tsp honey"),
-            steps = listOf("Cook oats with milk.", "Top with banana slices and honey."),
+            suggestedTime = "07:30",
+            approxCostEuro = 0.95f,
+            ingredients = listOf(
+                "60g rolled oats",
+                "300ml semi-skim milk",
+                "1 scoop whey protein (~25g)",
+                "1 banana",
+                "1 tbsp peanut butter"
+            ),
+            steps = listOf(
+                "Bring milk to a low simmer.",
+                "Stir in oats, cook 3 min on low heat.",
+                "Take off heat, whisk in whey (or it goes lumpy).",
+                "Top with sliced banana and peanut butter."
+            ),
             supermarket = "Lidl",
-            tags = listOf("fast", "budget")
+            tags = listOf("high-protein", "fast", "budget", "meal-prep")
         ),
         Recipe(
-            id = "br_02",
-            name = "Greek Yogurt Power Bowl",
+            id = "br_egg_scramble",
+            name = "Quick Eggs + Toast",
             mealType = "breakfast",
-            calories = 280,
-            protein = 22f, carbs = 30f, fat = 8f,
-            prepMinutes = 3,
-            ingredients = listOf("200g Greek Yogurt", "30g Granola", "Handful of Blueberries"),
-            steps = listOf("Place yogurt in a bowl.", "Add granola and fruit."),
+            calories = 410, protein = 28f, carbs = 32f, fat = 18f,
+            prepMinutes = 7,
+            suggestedTime = "07:30",
+            approxCostEuro = 0.70f,
+            ingredients = listOf(
+                "3 whole eggs",
+                "2 slices wholegrain bread",
+                "1 tsp olive oil",
+                "Salt, pepper, paprika",
+                "1 tomato (sliced)"
+            ),
+            steps = listOf(
+                "Whisk the eggs with salt, pepper and paprika.",
+                "Heat olive oil in a non-stick pan on medium-low.",
+                "Pour eggs in, stir gently with a spatula until just set (~2 min).",
+                "Toast the bread, top with eggs and sliced tomato."
+            ),
             supermarket = "Pingo Doce",
-            tags = listOf("high-protein", "no-cook")
+            tags = listOf("high-protein", "fast", "budget")
         ),
         Recipe(
-            id = "br_03",
-            name = "Avocado Toast with Egg",
+            id = "br_tuna_crackers",
+            name = "Portuguese Tuna & Crackers Bowl",
             mealType = "breakfast",
-            calories = 380,
-            protein = 16f, carbs = 35f, fat = 22f,
-            prepMinutes = 8,
-            ingredients = listOf("2 slices sourdough", "1/2 Avocado", "1 Poached egg", "Red pepper flakes"),
-            steps = listOf("Toast bread.", "Mash avocado on top.", "Place egg and season."),
-            supermarket = "Any",
-            tags = listOf("healthy-fats", "trending")
-        ),
-        Recipe(
-            id = "br_04",
-            name = "Protein Pancakes",
-            mealType = "breakfast",
-            calories = 420,
-            protein = 35f, carbs = 40f, fat = 12f,
-            prepMinutes = 15,
-            ingredients = listOf("1 scoop Whey Protein", "1 egg", "1/2 cup Oats", "1/4 cup Milk"),
-            steps = listOf("Blend all ingredients.", "Cook on a non-stick pan until golden."),
-            supermarket = "Any",
-            tags = listOf("high-protein", "muscle-build")
-        ),
-        Recipe(
-            id = "br_05",
-            name = "Scrambled Tofu Toast",
-            mealType = "breakfast",
-            calories = 310,
-            protein = 20f, carbs = 32f, fat = 14f,
-            prepMinutes = 10,
-            ingredients = listOf("200g Firm Tofu", "1 tsp Turmeric", "2 slices Whole wheat bread", "Spinach"),
-            steps = listOf("Crumble tofu and sauté with turmeric.", "Serve on toasted bread with spinach."),
+            calories = 380, protein = 32f, carbs = 36f, fat = 12f,
+            prepMinutes = 4,
+            suggestedTime = "07:30",
+            approxCostEuro = 1.10f,
+            ingredients = listOf(
+                "1 can tuna in water (120g, drained)",
+                "6 wholegrain crackers (Maria / Cream Cracker integral)",
+                "1 tbsp light mayo",
+                "Lemon juice + black pepper",
+                "Handful of cherry tomatoes"
+            ),
+            steps = listOf(
+                "Drain tuna well, flake into a bowl.",
+                "Mix with mayo, lemon juice, plenty of black pepper.",
+                "Serve with crackers and tomatoes on the side."
+            ),
             supermarket = "Lidl",
-            tags = listOf("vegan", "protein")
+            tags = listOf("no-cook", "high-protein", "budget")
         ),
 
-        // ── LUNCHES ─────────────────────────────────────────────────────
+        // ── 09:00 · MORNING SNACK ─────────────────────────────────────────
         Recipe(
-            id = "lu_01",
-            name = "Turkey & Avocado Baguette",
-            mealType = "lunch",
-            calories = 450,
-            protein = 28f, carbs = 55f, fat = 14f,
-            prepMinutes = 10,
-            ingredients = listOf("Whole grain baguette", "100g Turkey", "1/2 Avocado", "Lettuce"),
-            steps = listOf("Slice baguette.", "Fill with ingredients."),
-            supermarket = "Any",
-            tags = listOf("portable", "fresh")
+            id = "sn_yogurt_almond",
+            name = "Greek Yogurt, Honey & Almonds",
+            mealType = "snack",
+            calories = 280, protein = 22f, carbs = 24f, fat = 10f,
+            prepMinutes = 2,
+            suggestedTime = "09:00",
+            approxCostEuro = 0.85f,
+            ingredients = listOf(
+                "200g 0% Greek yogurt",
+                "1 tsp honey",
+                "15g almonds (about 12 nuts)"
+            ),
+            steps = listOf(
+                "Spoon yogurt into a small bowl.",
+                "Drizzle honey on top, sprinkle the almonds.",
+                "Done — 2 minutes flat."
+            ),
+            supermarket = "Aldi",
+            tags = listOf("no-cook", "high-protein", "fast", "budget")
         ),
         Recipe(
-            id = "lu_02",
+            id = "sn_boiled_eggs",
+            name = "2 Boiled Eggs + Coffee",
+            mealType = "snack",
+            calories = 180, protein = 14f, carbs = 1f, fat = 13f,
+            prepMinutes = 10,
+            suggestedTime = "09:00",
+            approxCostEuro = 0.40f,
+            ingredients = listOf(
+                "2 large eggs",
+                "Salt, black pepper",
+                "Black coffee, unsweetened"
+            ),
+            steps = listOf(
+                "Boil eggs 8 min from cold water (firm yolks) — batch 6 on Sunday.",
+                "Peel, season with salt and pepper.",
+                "Pair with coffee."
+            ),
+            supermarket = "Any",
+            tags = listOf("meal-prep", "high-protein", "very-cheap")
+        ),
+        Recipe(
+            id = "sn_pb_toast",
+            name = "Peanut Butter Banana Toast",
+            mealType = "snack",
+            calories = 320, protein = 12f, carbs = 38f, fat = 14f,
+            prepMinutes = 3,
+            suggestedTime = "09:00",
+            approxCostEuro = 0.55f,
+            ingredients = listOf(
+                "1 slice wholegrain bread",
+                "1 tbsp natural peanut butter",
+                "1 banana"
+            ),
+            steps = listOf(
+                "Toast the bread until crisp.",
+                "Spread peanut butter, top with banana slices."
+            ),
+            supermarket = "Lidl",
+            tags = listOf("no-cook", "fast", "budget")
+        ),
+
+        // ── 13:00 · LUNCH (variety: salad / pasta / chicken / pizza) ──────
+        Recipe(
+            id = "ln_chicken_rice_bowl",
+            name = "Chicken & Rice Power Bowl",
+            mealType = "lunch",
+            calories = 620, protein = 48f, carbs = 70f, fat = 12f,
+            prepMinutes = 25,
+            servings = 1,
+            suggestedTime = "13:00",
+            approxCostEuro = 2.10f,
+            ingredients = listOf(
+                "150g chicken breast",
+                "80g long-grain rice (dry weight)",
+                "1 tsp olive oil",
+                "Paprika, garlic powder, salt, pepper",
+                "100g frozen mixed vegetables",
+                "1 tbsp soy sauce"
+            ),
+            steps = listOf(
+                "Cook rice per pack (15 min).",
+                "Season chicken with paprika, garlic, salt, pepper.",
+                "Pan-fry chicken in olive oil over medium heat, 4-5 min per side.",
+                "Microwave frozen veg, 3 min.",
+                "Slice chicken, stack on rice + veg, finish with soy sauce."
+            ),
+            supermarket = "Pingo Doce",
+            tags = listOf("meal-prep", "high-protein", "budget", "chicken")
+        ),
+        Recipe(
+            id = "ln_tuna_pasta_salad",
             name = "Tuna Pasta Salad",
             mealType = "lunch",
-            calories = 520,
-            protein = 35f, carbs = 65f, fat = 12f,
+            calories = 540, protein = 38f, carbs = 62f, fat = 14f,
             prepMinutes = 15,
-            ingredients = listOf("80g Pasta", "1 can Tuna", "Corn", "Cherry tomatoes", "Olive oil"),
-            steps = listOf("Boil pasta.", "Mix with tuna and veggies."),
-            supermarket = "Continente",
-            tags = listOf("prep-friendly")
-        ),
-        Recipe(
-            id = "lu_03",
-            name = "Quinoa Harvest Bowl",
-            mealType = "lunch",
-            calories = 410,
-            protein = 18f, carbs = 60f, fat = 12f,
-            prepMinutes = 20,
-            ingredients = listOf("100g Quinoa", "Roasted sweet potato", "Spinach", "Chickpeas", "Tahini dressing"),
-            steps = listOf("Cook quinoa.", "Roast potatoes.", "Combine all and drizzle dressing."),
+            suggestedTime = "13:00",
+            approxCostEuro = 1.40f,
+            ingredients = listOf(
+                "100g pasta (penne or fusilli, dry)",
+                "1 can tuna in water (120g, drained)",
+                "100g cherry tomatoes (halved)",
+                "1/2 cucumber diced",
+                "1 tbsp olive oil",
+                "1 tbsp lemon juice",
+                "Salt, pepper, oregano"
+            ),
+            steps = listOf(
+                "Boil pasta in salted water until al dente; drain and rinse cold.",
+                "Toss pasta with tuna, tomatoes and cucumber.",
+                "Dress with olive oil, lemon juice, salt, pepper, oregano.",
+                "Chill 10 min if you can — better cold."
+            ),
             supermarket = "Lidl",
-            tags = listOf("vegan", "superfood")
+            tags = listOf("meal-prep", "salad", "pasta", "budget")
         ),
         Recipe(
-            id = "lu_04",
-            name = "Grilled Chicken Caesar Wrap",
+            id = "ln_pesto_chicken_pasta",
+            name = "Pesto Chicken Pasta",
             mealType = "lunch",
-            calories = 480,
-            protein = 32f, carbs = 42f, fat = 18f,
+            calories = 660, protein = 45f, carbs = 70f, fat = 18f,
+            prepMinutes = 20,
+            suggestedTime = "13:00",
+            approxCostEuro = 2.30f,
+            ingredients = listOf(
+                "100g pasta (penne, dry)",
+                "120g chicken breast, cubed",
+                "2 tbsp pesto (jarred is fine)",
+                "1 tsp olive oil",
+                "Handful baby spinach",
+                "Parmesan to taste"
+            ),
+            steps = listOf(
+                "Boil pasta until al dente; reserve 2 tbsp cooking water.",
+                "Pan-fry chicken cubes in olive oil over medium-high, 5-6 min.",
+                "Off heat, stir pesto + reserved pasta water into the pan.",
+                "Toss with pasta and spinach (it wilts from residual heat).",
+                "Top with parmesan."
+            ),
+            supermarket = "Continente",
+            tags = listOf("pasta", "chicken", "fast")
+        ),
+        Recipe(
+            id = "ln_caesar_salad_cheap",
+            name = "Cheap Chicken Caesar Salad",
+            mealType = "lunch",
+            calories = 480, protein = 42f, carbs = 18f, fat = 24f,
+            prepMinutes = 15,
+            suggestedTime = "13:00",
+            approxCostEuro = 1.80f,
+            ingredients = listOf(
+                "150g chicken breast",
+                "1 small romaine lettuce",
+                "2 tbsp light mayo + 1 tsp lemon juice + 1 garlic clove (DIY dressing)",
+                "20g parmesan, grated",
+                "Croutons (or 1 slice toasted bread, cubed)",
+                "Salt, pepper"
+            ),
+            steps = listOf(
+                "Season and pan-fry chicken in 1 tsp olive oil, 4-5 min/side.",
+                "Mix mayo + lemon + crushed garlic for the dressing.",
+                "Tear lettuce into a big bowl, slice chicken on top.",
+                "Toss with dressing, parmesan, croutons."
+            ),
+            supermarket = "Lidl",
+            tags = listOf("salad", "chicken", "high-protein")
+        ),
+        Recipe(
+            id = "ln_tortilla_pizza",
+            name = "Tortilla Protein Pizza",
+            mealType = "lunch",
+            calories = 520, protein = 38f, carbs = 48f, fat = 18f,
             prepMinutes = 12,
-            ingredients = listOf("1 Tortilla wrap", "120g Grilled chicken", "Romaine lettuce", "Light Caesar dressing"),
-            steps = listOf("Toss chicken and lettuce with dressing.", "Wrap tightly and serve."),
-            supermarket = "Any",
-            tags = listOf("quick", "protein")
-        ),
-        Recipe(
-            id = "lu_05",
-            name = "Lentil Soup",
-            mealType = "lunch",
-            calories = 350,
-            protein = 22f, carbs = 50f, fat = 5f,
-            prepMinutes = 30,
-            ingredients = listOf("1 cup Red lentils", "1 Onion", "2 Carrots", "Vegetable broth"),
-            steps = listOf("Sauté onion and carrots.", "Add lentils and broth.", "Simmer for 20 mins."),
-            supermarket = "Pingo Doce",
-            tags = listOf("healthy", "budget")
-        ),
-        Recipe(
-            id = "lu_06",
-            name = "Budget Beef & Cabbage Stir-fry",
-            mealType = "lunch",
-            calories = 380,
-            protein = 28f, carbs = 12f, fat = 22f,
-            prepMinutes = 15,
-            ingredients = listOf("200g Cabbage", "150g Ground beef", "Soy sauce", "Garlic", "Ginger"),
-            steps = listOf("Brown the beef in a pan.", "Add shredded cabbage and spices.", "Cook until cabbage is tender."),
-            supermarket = "Lidl",
-            tags = listOf("budgetbytes", "low-carb", "cheap")
-        ),
-        Recipe(
-            id = "lu_07",
-            name = "Roasted Chickpea Salad",
-            mealType = "lunch",
-            calories = 410,
-            protein = 15f, carbs = 45f, fat = 18f,
-            prepMinutes = 10,
-            ingredients = listOf("1 can Chickpeas", "Cucumber", "Tomato", "Lemon juice", "Olive oil"),
-            steps = listOf("Drain chickpeas.", "Chop veggies and mix everything.", "Season with lemon and salt."),
-            supermarket = "Any",
-            tags = listOf("vegan", "budget", "no-cook")
-        ),
-        Recipe(
-            id = "lu_08",
-            name = "Peanut Chicken Skillet",
-            mealType = "lunch",
-            calories = 450,
-            protein = 35f, carbs = 15f, fat = 25f,
-            prepMinutes = 20,
-            ingredients = listOf("200g Chicken", "Peanut butter sauce", "Mixed frozen veggies", "Rice (optional)"),
-            steps = listOf("Cook chicken.", "Add veggies and sauce.", "Stir until creamy."),
-            supermarket = "Lidl",
-            tags = listOf("budgetbytes", "high-protein")
+            suggestedTime = "13:00",
+            approxCostEuro = 1.60f,
+            ingredients = listOf(
+                "1 large wholewheat tortilla wrap",
+                "3 tbsp tomato sauce (passata + salt + oregano)",
+                "80g shredded mozzarella (light)",
+                "100g cooked chicken or 60g lean ham, chopped",
+                "Sliced bell pepper, red onion",
+                "Black pepper, chili flakes"
+            ),
+            steps = listOf(
+                "Preheat oven to 220°C.",
+                "Place tortilla on a baking tray, spread tomato sauce thinly.",
+                "Top with mozzarella, chicken/ham and veg.",
+                "Bake 7-8 min until cheese bubbles and edges crisp.",
+                "Season with pepper and chili flakes."
+            ),
+            supermarket = "Aldi",
+            tags = listOf("pizza", "fast", "high-protein", "budget")
         ),
 
-        // ── DINNERS ─────────────────────────────────────────────────────
+        // ── 19:00 · DINNER ────────────────────────────────────────────────
         Recipe(
-            id = "di_01",
-            name = "Fit Homemade Pizza",
+            id = "dn_baked_chicken_veg",
+            name = "Baked Chicken + Roasted Veg",
             mealType = "dinner",
-            calories = 580,
-            protein = 30f, carbs = 75f, fat = 18f,
-            prepMinutes = 20,
-            ingredients = listOf("Whole wheat base", "Tomato sauce", "Light Mozzarella", "Veggies"),
-            steps = listOf("Assemble pizza.", "Bake at 200°C for 12 mins."),
-            supermarket = "Lidl",
-            tags = listOf("tasty", "weekend")
-        ),
-        Recipe(
-            id = "di_02",
-            name = "Grilled Chicken & Sweet Potato",
-            mealType = "dinner",
-            calories = 420,
-            protein = 40f, carbs = 45f, fat = 8f,
-            prepMinutes = 25,
-            ingredients = listOf("150g Chicken breast", "200g Sweet potato", "Broccoli"),
-            steps = listOf("Grill chicken.", "Boil or roast sweet potato."),
-            supermarket = "Any",
-            tags = listOf("clean", "muscle-build")
-        ),
-        Recipe(
-            id = "di_03",
-            name = "Salmon with Asparagus",
-            mealType = "dinner",
-            calories = 490,
-            protein = 38f, carbs = 10f, fat = 35f,
-            prepMinutes = 15,
-            ingredients = listOf("200g Salmon fillet", "1 bunch Asparagus", "Lemon", "Garlic butter"),
-            steps = listOf("Season salmon.", "Pan-sear salmon and asparagus together."),
-            supermarket = "Pingo Doce",
-            tags = listOf("low-carb", "omega-3")
-        ),
-        Recipe(
-            id = "di_04",
-            name = "Beef & Broccoli Stir-Fry",
-            mealType = "dinner",
-            calories = 460,
-            protein = 35f, carbs = 15f, fat = 28f,
-            prepMinutes = 20,
-            ingredients = listOf("150g Beef strips", "1 cup Broccoli", "Soy sauce", "Ginger", "Sesame oil"),
-            steps = listOf("Sauté beef until brown.", "Add broccoli and sauce.", "Stir-fry until tender."),
-            supermarket = "Any",
-            tags = listOf("low-carb", "high-protein")
-        ),
-        Recipe(
-            id = "di_05",
-            name = "Baked Cod with Potatoes",
-            mealType = "dinner",
-            calories = 380,
-            protein = 30f, carbs = 40f, fat = 10f,
+            calories = 480, protein = 48f, carbs = 28f, fat = 16f,
             prepMinutes = 35,
-            ingredients = listOf("150g Cod fillet", "2 Potatoes", "Olive oil", "Onion"),
-            steps = listOf("Slice potatoes and onion.", "Place cod on top.", "Bake at 180°C for 25 mins."),
-            supermarket = "Continente",
-            tags = listOf("traditional", "healthy")
+            suggestedTime = "19:00",
+            approxCostEuro = 2.20f,
+            ingredients = listOf(
+                "180g chicken breast",
+                "1 zucchini, sliced",
+                "1 bell pepper, sliced",
+                "1 small onion, wedges",
+                "2 tsp olive oil",
+                "Garlic, paprika, oregano, salt, pepper"
+            ),
+            steps = listOf(
+                "Preheat oven to 200°C.",
+                "Toss veg with 1 tsp olive oil and seasonings on a sheet pan.",
+                "Season chicken, drizzle with the other tsp of oil; nestle on the pan.",
+                "Bake 25 min — chicken at 75°C internal."
+            ),
+            supermarket = "Pingo Doce",
+            tags = listOf("meal-prep", "high-protein", "chicken", "low-carb")
         ),
         Recipe(
-            id = "di_06",
-            name = "Sheet Pan Sausage & Veggies",
+            id = "dn_lentil_stew",
+            name = "Lentil & Tomato Stew",
             mealType = "dinner",
-            calories = 420,
-            protein = 25f, carbs = 20f, fat = 30f,
-            prepMinutes = 10,
-            ingredients = listOf("Turkey Sausage", "Bell peppers", "Zucchini", "Onion", "Olive oil"),
-            steps = listOf("Chop everything.", "Toss with oil and spices.", "Bake at 200°C for 25 mins."),
-            supermarket = "Any",
-            tags = listOf("budgetbytes", "one-pan")
+            calories = 430, protein = 24f, carbs = 62f, fat = 8f,
+            prepMinutes = 30,
+            servings = 4,
+            suggestedTime = "19:00",
+            approxCostEuro = 0.65f,
+            ingredients = listOf(
+                "250g dried lentils (red or brown)",
+                "1 can chopped tomatoes (400g)",
+                "1 onion, diced",
+                "2 cloves garlic, minced",
+                "1 tsp olive oil",
+                "1 tsp cumin, 1 tsp smoked paprika, salt",
+                "750ml veg or chicken stock"
+            ),
+            steps = listOf(
+                "Sauté onion + garlic in olive oil 3 min.",
+                "Stir in cumin and paprika 30 sec.",
+                "Add lentils, tomatoes, stock; bring to boil.",
+                "Simmer 20-25 min until lentils are soft.",
+                "Salt to taste. Freezes well in 4 portions."
+            ),
+            supermarket = "Lidl",
+            tags = listOf("vegetarian", "meal-prep", "very-cheap", "high-fiber")
+        ),
+        Recipe(
+            id = "dn_chicken_chili",
+            name = "Chicken Chili + Rice",
+            mealType = "dinner",
+            calories = 560, protein = 44f, carbs = 60f, fat = 12f,
+            prepMinutes = 30,
+            servings = 3,
+            suggestedTime = "19:00",
+            approxCostEuro = 1.80f,
+            ingredients = listOf(
+                "400g chicken breast, cubed",
+                "1 can red kidney beans (400g, drained)",
+                "1 can chopped tomatoes (400g)",
+                "1 onion, diced",
+                "1 bell pepper, diced",
+                "2 tsp chili powder, 1 tsp cumin, salt",
+                "240g rice (dry, for 3 servings)"
+            ),
+            steps = listOf(
+                "Brown chicken cubes in a pot, 5 min.",
+                "Add onion + pepper, cook 4 min.",
+                "Add tomatoes, beans, spices; simmer 15 min.",
+                "Meanwhile cook rice per pack.",
+                "Serve chili over rice. Stores 4 days in fridge."
+            ),
+            supermarket = "Continente",
+            tags = listOf("meal-prep", "high-protein", "chicken", "budget")
         ),
 
-        // ── SNACKS & SHAKES ───────────────────────────────────
+        // ── 20:00 · LATE SNACK · CREATINE WINDOW ──────────────────────────
         Recipe(
-            id = "sn_01",
-            name = "Energy Rice Cakes",
+            id = "ls_casein_creatine",
+            name = "Casein Shake + Creatine",
             mealType = "snack",
-            calories = 190,
-            protein = 4f, carbs = 35f, fat = 5f,
+            calories = 220, protein = 30f, carbs = 12f, fat = 5f,
             prepMinutes = 2,
-            ingredients = listOf("2 Rice cakes", "1 tbsp Peanut butter", "1/2 Banana"),
-            steps = listOf("Spread peanut butter.", "Top with banana."),
-            supermarket = "Any",
-            tags = listOf("pre-workout", "energy")
+            suggestedTime = "20:00",
+            approxCostEuro = 0.80f,
+            ingredients = listOf(
+                "1 scoop casein protein (~30g)",
+                "250ml semi-skim milk",
+                "5g creatine monohydrate",
+                "1 tsp cocoa powder (optional)"
+            ),
+            steps = listOf(
+                "Add milk to a shaker, then casein, then creatine.",
+                "Shake 30 seconds until smooth.",
+                "Drink right after — casein digests slowly, perfect before bed."
+            ),
+            supermarket = "Prozis / Decathlon",
+            tags = listOf("supplement", "high-protein", "bedtime"),
+            supplementNote = "Take your daily 5 g creatine here — timing doesn't matter as long as you're consistent every day."
         ),
         Recipe(
-            id = "sn_02",
-            name = "Muscle Recovery Shake",
+            id = "ls_cottage_cheese",
+            name = "Cottage Cheese + Banana + Creatine",
             mealType = "snack",
-            calories = 250,
-            protein = 30f, carbs = 25f, fat = 3f,
-            prepMinutes = 2,
-            ingredients = listOf("1 scoop Whey", "250ml milk", "1 tbsp Oats", "Frozen berries"),
-            steps = listOf("Blend all ingredients together."),
-            supermarket = "Any",
-            tags = listOf("post-workout", "protein")
-        ),
-        Recipe(
-            id = "sn_03",
-            name = "Green Detox Smoothie",
-            mealType = "snack",
-            calories = 150,
-            protein = 3f, carbs = 30f, fat = 1f,
-            prepMinutes = 5,
-            ingredients = listOf("1 cup Spinach", "1 Green apple", "1/2 Cucumber", "Lemon juice"),
-            steps = listOf("Blend all ingredients with water."),
-            supermarket = "Any",
-            tags = listOf("detox", "fresh")
-        ),
-        Recipe(
-            id = "sn_04",
-            name = "Almond & Dark Chocolate Bar",
-            mealType = "snack",
-            calories = 210,
-            protein = 6f, carbs = 15f, fat = 14f,
-            prepMinutes = 2,
-            ingredients = listOf("Handful of Almonds", "2 squares Dark chocolate (85%)"),
-            steps = listOf("Enjoy together as a quick snack."),
-            supermarket = "Any",
-            tags = listOf("healthy-fat", "quick")
-        ),
-        Recipe(
-            id = "sn_05",
-            name = "Post-Workout Banana Shake",
-            mealType = "snack",
-            calories = 320,
-            protein = 25f, carbs = 50f, fat = 4f,
+            calories = 260, protein = 28f, carbs = 28f, fat = 4f,
             prepMinutes = 3,
-            ingredients = listOf("1 scoop Protein powder", "1 large Banana", "300ml Water", "Ice cubes"),
-            steps = listOf("Blend until smooth."),
+            suggestedTime = "20:00",
+            approxCostEuro = 1.00f,
+            ingredients = listOf(
+                "200g cottage cheese (low-fat)",
+                "1 banana, sliced",
+                "1 tsp honey",
+                "5g creatine monohydrate (stirred into water)"
+            ),
+            steps = listOf(
+                "Spoon cottage cheese into a bowl, top with banana and honey.",
+                "Take creatine separately with a glass of water."
+            ),
+            supermarket = "Lidl",
+            tags = listOf("no-cook", "supplement", "high-protein"),
+            supplementNote = "5 g creatine monohydrate daily, every day, no loading needed."
+        ),
+
+        // ── DRINKS ────────────────────────────────────────────────────────
+        Recipe(
+            id = "dr_post_workout_shake",
+            name = "Post-Workout Protein Shake",
+            mealType = "drink",
+            calories = 320, protein = 35f, carbs = 38f, fat = 4f,
+            prepMinutes = 3,
+            suggestedTime = "post-workout",
+            approxCostEuro = 0.95f,
+            ingredients = listOf(
+                "1 scoop whey protein (~25g)",
+                "300ml semi-skim milk",
+                "1 banana",
+                "5g creatine (optional, if you didn't take it earlier)"
+            ),
+            steps = listOf(
+                "Blend everything 30 sec until smooth.",
+                "Drink within 30 min of the last set for the simplest recovery window."
+            ),
+            supermarket = "Prozis / Decathlon",
+            tags = listOf("drink", "supplement", "post-workout")
+        ),
+        Recipe(
+            id = "dr_iced_coffee_creatine",
+            name = "Iced Coffee + Creatine",
+            mealType = "drink",
+            calories = 35, protein = 1f, carbs = 4f, fat = 1f,
+            prepMinutes = 5,
+            suggestedTime = "pre-workout",
+            approxCostEuro = 0.25f,
+            ingredients = listOf(
+                "1 double espresso (chilled)",
+                "150ml cold semi-skim milk",
+                "Ice cubes",
+                "5g creatine monohydrate"
+            ),
+            steps = listOf(
+                "Brew espresso, let it cool 5 min.",
+                "Stir creatine into a splash of warm water until dissolved.",
+                "Pour everything over ice."
+            ),
             supermarket = "Any",
-            tags = listOf("post-workout", "recovery")
+            tags = listOf("drink", "supplement", "pre-workout", "very-cheap"),
+            supplementNote = "Caffeine + creatine together is fine — both improve training output."
+        ),
+        Recipe(
+            id = "dr_lemon_mint_water",
+            name = "Lemon & Mint Hydration Jug",
+            mealType = "drink",
+            calories = 10, protein = 0f, carbs = 2f, fat = 0f,
+            prepMinutes = 3,
+            servings = 4,
+            suggestedTime = "all-day",
+            approxCostEuro = 0.30f,
+            ingredients = listOf(
+                "1.5L cold water",
+                "1 lemon, sliced",
+                "Handful fresh mint",
+                "Ice"
+            ),
+            steps = listOf(
+                "Slice lemon, lightly bruise mint leaves.",
+                "Combine in a jug with water + ice.",
+                "Drink throughout the day — aim 3L total water at 115 kg."
+            ),
+            supermarket = "Any",
+            tags = listOf("drink", "zero-cal", "hydration", "very-cheap")
         )
     )
+
+    /**
+     * Suggested daily meal schedule. Drives the "what should I be eating now?"
+     * hint on the Meal Plan screen and could feed a future notification too.
+     */
+    val mealSchedule: List<MealSlot> = listOf(
+        MealSlot("Breakfast", "07:30", "breakfast"),
+        MealSlot("Morning Snack", "09:00", "snack"),
+        MealSlot("Lunch", "13:00", "lunch"),
+        MealSlot("Dinner", "19:00", "dinner"),
+        MealSlot("Late Snack + Creatine", "20:00", "snack")
+    )
+
 
     val foodDatabase = listOf(
         FoodItem("Chicken Breast", 165, 31f, 0f, 3.6f),
@@ -683,7 +890,6 @@ object AppContent {
         "💪 Don't stop until you're proud.",
         "🍕 Balance is key: Train hard, eat smart.",
         "💧 70% of your muscles are water. Drink up!",
-        "🔥 Tomorrow's results start with today's sweat.",
         "⚡ You're one workout away from a good mood.",
         "💡 Focused on Quads? Keep the weight on your mid-foot/heels.",
         "💡 Obliques are built with rotation. Control every twist.",
@@ -691,6 +897,8 @@ object AppContent {
         "🏋️ A heavier lift today is a lighter body tomorrow.",
         "⏱ Short rests + heavy weights = the fastest fat loss.",
         "🥩 Eat protein every 3–4 hours · muscle stays, fat goes.",
-        "📉 You don't out-train a bad diet — track the calories."
+        "📉 You don't out-train a bad diet — track the calories.",
+        "💊 Creatine: 5 g daily, every day, with any meal. Consistency > timing.",
+        "🥗 Cheap, simple, repeated. That's how you lose weight."
     )
 }
