@@ -22,4 +22,6 @@
         android:text="60kg • 3x12"
         android:textSize="@dimen/text_md"
         android:textStyle="bold"
-        android:textColor="@color/p
+        android:textColor="@color/primary" />
+
+</LinearLayout>

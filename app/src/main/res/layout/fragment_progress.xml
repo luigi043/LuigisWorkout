@@ -357,4 +357,9 @@
                     android:id="@+id/rvWeightHistory"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-         
+                    android:nestedScrollingEnabled="false" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>
