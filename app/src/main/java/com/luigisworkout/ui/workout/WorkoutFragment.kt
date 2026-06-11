@@ -507,8 +507,16 @@ class ExerciseAdapter(
         webView.settings.javaScriptEnabled = true // MuscleWiki's video player needs JS
         webView.settings.domStorageEnabled = true
         webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                progress.isVisible = true
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 progress.isVisible = false
+                // Skip the results list: jump straight to the top exercise hit.
+                if (MuscleWiki.isSearchUrl(url)) {
+                    view?.evaluateJavascript(MuscleWiki.AUTO_OPEN_FIRST_RESULT_JS, null)
+                }
             }
         }
         webView.loadUrl(MuscleWiki.searchUrl(exerciseName))
