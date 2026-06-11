@@ -1,5 +1,7 @@
 package com.luigisworkout.viewmodel
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -25,7 +27,13 @@ import java.util.Locale
 fun appViewModelFactory(app: LuigisWorkoutApp): ViewModelProvider.Factory = viewModelFactory {
     initializer { HomeViewModel(app.repository, app.todayDate) }
     initializer { MealPlanViewModel(app.repository, app.todayDate) }
-    initializer { WorkoutViewModel(app.repository, app.todayDate) }
+    initializer {
+        WorkoutViewModel(
+            app.repository,
+            app.todayDate,
+            app.getSharedPreferences("workout_state", Context.MODE_PRIVATE)
+        )
+    }
     initializer { ProgressViewModel(app.repository) }
     initializer { LogMealViewModel(app.repository) }
     initializer { LogWeightViewModel(app.repository) }
@@ -130,7 +138,8 @@ class LogMealViewModel(
 
 class WorkoutViewModel(
     private val repository: AppRepository,
-    todayDate: LiveData<String>
+    todayDate: LiveData<String>,
+    private val prefs: SharedPreferences
 ) : ViewModel() {
 
     val allWorkouts: LiveData<List<WorkoutLog>> = repository.getAllWorkouts()
@@ -193,41 +202,120 @@ class WorkoutViewModel(
     /** Fired exactly once when logWorkout pushes the user to a new week. */
     val weekAdvanced = SingleLiveEvent<Int>()
 
-    // ─── Timer state (survives Fragment view recreation via the ViewModel) ───
+    // ─── Timer + in-progress check state ─────────────────────────────────────
+    //
+    // Survives Fragment view recreation (lives in the ViewModel) AND app
+    // close/process death: every mutation is mirrored to SharedPreferences and
+    // restored in init. Elapsed time is wall-clock based, so a running timer
+    // keeps counting while the app is in the background or closed.
+    // Paused time is excluded via accumulatedMillis + segmentStart.
 
-    var isWorkoutActive: Boolean = false
+    var isWorkoutActive: Boolean = prefs.getBoolean(KEY_ACTIVE, false)
         private set
-    var workoutStartTime: Long = 0L
+    var workoutStartTime: Long = prefs.getLong(KEY_START_TIME, 0L)
         private set
+
+    /** Milliseconds accumulated across finished run segments (pauses excluded). */
+    private var accumulatedMillis: Long = prefs.getLong(KEY_ACCUM_MS, 0L)
+
+    /** Wall-clock start of the current running segment; only meaningful while active. */
+    private var segmentStart: Long = prefs.getLong(KEY_SEGMENT_MS, 0L)
+
+    /** The (week, day) that [completedExercises] belongs to. -1 = none yet. */
+    var progressWeek: Int = prefs.getInt(KEY_WEEK, -1)
+        private set
+    var progressDay: Int = prefs.getInt(KEY_DAY, -1)
+        private set
+
+    /** Indices of exercises ticked for (progressWeek, progressDay). */
+    val completedExercises: MutableSet<Int> =
+        (prefs.getString(KEY_COMPLETED, "") ?: "")
+            .split(',')
+            .mapNotNull { it.toIntOrNull() }
+            .toMutableSet()
+
+    /** True when there is restorable workout state (running, paused, or ticked boxes). */
+    val hasInProgressState: Boolean
+        get() = workoutStartTime != 0L || completedExercises.isNotEmpty()
 
     private var timerJob: Job? = null
 
-    private val _elapsedTime = MutableLiveData("⏱ 00:00")
+    private val _elapsedTime = MutableLiveData(formatElapsed(0L))
     val elapsedTime: LiveData<String> = _elapsedTime
+
+    init {
+        // Pick the timer back up if the app was closed/killed mid-workout.
+        if (isWorkoutActive) startTimer() else _elapsedTime.value = formatElapsed(elapsedMillis())
+    }
+
+    fun elapsedMillis(): Long =
+        accumulatedMillis + if (isWorkoutActive) System.currentTimeMillis() - segmentStart else 0L
 
     fun startWorkout() {
         if (isWorkoutActive) return
         isWorkoutActive = true
-        if (workoutStartTime == 0L) workoutStartTime = System.currentTimeMillis()
+        segmentStart = System.currentTimeMillis()
+        if (workoutStartTime == 0L) workoutStartTime = segmentStart
+        persistTimer()
         startTimer()
     }
 
     fun pauseWorkout() {
+        if (!isWorkoutActive) return
+        accumulatedMillis += System.currentTimeMillis() - segmentStart
         isWorkoutActive = false
         timerJob?.cancel()
+        persistTimer()
     }
 
-    fun resumeWorkout() {
-        if (isWorkoutActive) return
-        isWorkoutActive = true
-        startTimer()
-    }
+    fun resumeWorkout() = startWorkout()
 
     fun resetWorkout() {
         isWorkoutActive = false
         workoutStartTime = 0L
+        accumulatedMillis = 0L
+        segmentStart = 0L
         timerJob?.cancel()
-        _elapsedTime.value = "⏱ 00:00"
+        _elapsedTime.value = formatElapsed(0L)
+        completedExercises.clear()
+        prefs.edit().clear().apply()
+    }
+
+    /**
+     * Point the in-progress state at (week, day). When this differs from the day
+     * the saved state belongs to, checks are cleared and any non-running timer is
+     * dropped. Returns true when the saved state matches (i.e. it was restored).
+     */
+    fun bindDay(week: Int, day: Int): Boolean {
+        if (week == progressWeek && day == progressDay) return true
+        progressWeek = week
+        progressDay = day
+        completedExercises.clear()
+        if (!isWorkoutActive) {
+            // A paused/unstarted timer belonged to the previous day — drop it.
+            workoutStartTime = 0L
+            accumulatedMillis = 0L
+            segmentStart = 0L
+            _elapsedTime.value = formatElapsed(0L)
+        }
+        persistAll()
+        return false
+    }
+
+    fun setExerciseCompleted(index: Int, completed: Boolean) {
+        if (completed) completedExercises.add(index) else completedExercises.remove(index)
+        persistChecks()
+    }
+
+    fun markAllCompleted(count: Int) {
+        completedExercises.clear()
+        completedExercises.addAll(0 until count)
+        persistChecks()
+    }
+
+    fun clearCompleted() {
+        completedExercises.clear()
+        persistChecks()
     }
 
     private fun startTimer() {
@@ -236,13 +324,50 @@ class WorkoutViewModel(
             // viewModelScope runs on Main, so `value =` is safe and avoids the
             // small postValue() coalescing delay that made the timer visibly jitter.
             while (isWorkoutActive) {
-                val elapsed = (System.currentTimeMillis() - workoutStartTime) / 1000
-                val minutes = elapsed / 60
-                val seconds = elapsed % 60
-                _elapsedTime.value = String.format(Locale.getDefault(), "⏱ %02d:%02d", minutes, seconds)
+                _elapsedTime.value = formatElapsed(elapsedMillis())
                 delay(1000)
             }
         }
+    }
+
+    private fun formatElapsed(ms: Long): String {
+        val totalSeconds = ms / 1000
+        return String.format(Locale.getDefault(), "⏱ %02d:%02d", totalSeconds / 60, totalSeconds % 60)
+    }
+
+    private fun persistTimer() {
+        prefs.edit()
+            .putBoolean(KEY_ACTIVE, isWorkoutActive)
+            .putLong(KEY_START_TIME, workoutStartTime)
+            .putLong(KEY_ACCUM_MS, accumulatedMillis)
+            .putLong(KEY_SEGMENT_MS, segmentStart)
+            .apply()
+    }
+
+    private fun persistChecks() {
+        prefs.edit().putString(KEY_COMPLETED, completedExercises.joinToString(",")).apply()
+    }
+
+    private fun persistAll() {
+        prefs.edit()
+            .putBoolean(KEY_ACTIVE, isWorkoutActive)
+            .putLong(KEY_START_TIME, workoutStartTime)
+            .putLong(KEY_ACCUM_MS, accumulatedMillis)
+            .putLong(KEY_SEGMENT_MS, segmentStart)
+            .putInt(KEY_WEEK, progressWeek)
+            .putInt(KEY_DAY, progressDay)
+            .putString(KEY_COMPLETED, completedExercises.joinToString(","))
+            .apply()
+    }
+
+    private companion object {
+        const val KEY_ACTIVE = "active"
+        const val KEY_START_TIME = "startTimeMs"
+        const val KEY_ACCUM_MS = "accumulatedMs"
+        const val KEY_SEGMENT_MS = "segmentStartMs"
+        const val KEY_WEEK = "progressWeek"
+        const val KEY_DAY = "progressDay"
+        const val KEY_COMPLETED = "completedIndices"
     }
 
     fun getWorkoutsByWeek(week: Int): List<WorkoutDay> = fullPlan.filter { it.weekNumber == week }

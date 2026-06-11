@@ -80,6 +80,8 @@
     <string name="track_progress_title">Track Progress: %s</string>
     <string name="track_progress_msg">Feature coming soon! You\'ll be able to see your weight history for this exercise.</string>
     <string name="view_example">View example</string>
+    <string name="example_powered_by">Example from MuscleWiki</string>
+    <string name="open_in_browser">Open in browser</string>
     <string name="no_browser_available">No browser app found to open the link</string>
     <string name="ok">OK</string>
 
