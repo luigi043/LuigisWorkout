@@ -41,7 +41,10 @@ class MainActivity : AppCompatActivity() {
 
         val bottomNav = binding.bottomNavigation
         val appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.homeFragment, R.id.mealPlanFragment, R.id.workoutFragment, R.id.progressFragment)
+            setOf(
+                R.id.homeFragment, R.id.mealPlanFragment, R.id.workoutFragment,
+                R.id.exerciseLibraryFragment, R.id.progressFragment
+            )
         )
 
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -50,8 +53,8 @@ class MainActivity : AppCompatActivity() {
         // Hide toolbar and bottom nav on certain destinations
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.homeFragment, R.id.mealPlanFragment,
-                R.id.workoutFragment, R.id.progressFragment -> {
+                R.id.homeFragment, R.id.mealPlanFragment, R.id.workoutFragment,
+                R.id.exerciseLibraryFragment, R.id.progressFragment -> {
                     binding.toolbar.visibility = View.VISIBLE
                     binding.bottomNavigation.visibility = View.VISIBLE
                 }

@@ -6,6 +6,7 @@
     <string name="nav_home">Home</string>
     <string name="nav_meals">Meals</string>
     <string name="nav_workout">Workout</string>
+    <string name="nav_exercises">Exercises</string>
     <string name="nav_progress">Progress</string>
 
     <!-- Home -->
@@ -83,6 +84,12 @@
     <string name="example_powered_by">Example from MuscleWiki</string>
     <string name="open_in_browser">Open in browser</string>
     <string name="no_browser_available">No browser app found to open the link</string>
+
+    <!-- Exercise Library -->
+    <string name="watch">Watch</string>
+    <string name="exercise_library_title">Exercise Library</string>
+    <string name="exercise_library_subtitle">Tap any exercise to watch the demo · powered by MuscleWiki</string>
+    <string name="exercise_library_empty">No exercises in this group yet.</string>
     <string name="ok">OK</string>
 
     <!-- Shopping List -->

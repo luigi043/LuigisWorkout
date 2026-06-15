@@ -30,6 +30,12 @@
         tools:layout="@layout/fragment_progress" />
 
     <fragment
+        android:id="@+id/exerciseLibraryFragment"
+        android:name="com.luigisworkout.ui.exercises.ExerciseLibraryFragment"
+        android:label="Exercícios"
+        tools:layout="@layout/fragment_exercise_library" />
+
+    <fragment
         android:id="@+id/shoppingListFragment"
         android:name="com.luigisworkout.ui.mealplan.ShoppingListFragment"
         android:label="Lista de Compras"

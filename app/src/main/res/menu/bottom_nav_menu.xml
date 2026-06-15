@@ -17,6 +17,11 @@
         android:title="@string/nav_workout" />
 
     <item
+        android:id="@+id/exerciseLibraryFragment"
+        android:icon="@drawable/ic_exercise"
+        android:title="@string/nav_exercises" />
+
+    <item
         android:id="@+id/progressFragment"
         android:icon="@drawable/ic_progress"
         android:title="@string/nav_progress" />

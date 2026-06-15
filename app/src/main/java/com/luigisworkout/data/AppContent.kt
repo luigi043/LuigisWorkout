@@ -61,7 +61,21 @@ data class FoodItem(
     val fat: Float,
     val unit: String = "100g",
     val supermarket: String = "Any",
-    val priceRating: String = "$" 
+    val priceRating: String = "$"
+)
+
+/**
+ * A single entry in the browsable exercise library (the "Exercises" tab).
+ * Lightweight on purpose — it carries just enough to render a card and open
+ * the matching musclewiki.com video via the in-app example sheet (which only
+ * needs [name]). [muscle] doubles as the filter category.
+ */
+data class LibraryExercise(
+    val name: String,
+    val muscle: String,        // filter category: Chest, Back, Shoulders, Arms, Legs, Glutes, Core, Cardio
+    val equipment: String,     // Barbell, Dumbbell, Cable, Machine, Bodyweight, Kettlebell
+    val difficulty: String = "Medium",
+    val tip: String = ""       // short one-line coaching cue
 )
 
 // ─── CONTENT ───────────────────────────────────────────────────────────────────
@@ -577,6 +591,137 @@ object AppContent {
         FoodItem("Cabbage", 25, 1.3f, 6f, 0.1f),
         FoodItem("Ground Beef", 250, 26f, 0f, 15f),
         FoodItem("Chickpeas", 164, 9f, 27f, 2.6f)
+    )
+
+    // ─── EXERCISE LIBRARY ────────────────────────────────────────────────────────
+    //
+    // Browsable catalogue for the "Exercises" tab — a musclewiki.com-style home of
+    // movements grouped by muscle. Tapping any card opens the in-app video example
+    // (search lands on the matching musclewiki.com demo). Names are kept standard
+    // so the search resolves cleanly. Weight-loss bias: lots of big compound lifts
+    // plus a dedicated Cardio group for calorie burn.
+
+    /** Filter chips, in display order. "All" is prepended by the UI. */
+    val libraryMuscles = listOf(
+        "Chest", "Back", "Shoulders", "Arms", "Legs", "Glutes", "Core", "Cardio"
+    )
+
+    val exerciseLibrary: List<LibraryExercise> = listOf(
+        // ── CHEST ──────────────────────────────────────────────────────────────
+        LibraryExercise("Barbell Bench Press", "Chest", "Barbell", "Advanced",
+            "Pinch shoulder blades · bar to lower chest · controlled descent"),
+        LibraryExercise("Incline Barbell Bench Press", "Chest", "Barbell", "Advanced",
+            "Bench at 30–45° · bar to upper chest · elbows ~45°"),
+        LibraryExercise("Incline Dumbbell Press", "Chest", "Dumbbell",
+            "Press up and slightly in · full stretch at the bottom"),
+        LibraryExercise("Dumbbell Bench Press", "Chest", "Dumbbell",
+            "Wrists stacked over elbows · don't clank the DBs at the top"),
+        LibraryExercise("Cable Chest Fly", "Chest", "Cable",
+            "Slight elbow bend · meet in front of the hips · 1 s squeeze"),
+        LibraryExercise("Push Up", "Chest", "Bodyweight", "Beginner",
+            "Straight line head to heels · chest to fists · elevate hands if hard"),
+        LibraryExercise("Machine Chest Press", "Chest", "Machine", "Beginner",
+            "Handles at mid-chest · press without locking out hard"),
+
+        // ── BACK ───────────────────────────────────────────────────────────────
+        LibraryExercise("Lat Pulldown", "Back", "Cable",
+            "Wide grip · pull bar to upper chest · drive elbows down"),
+        LibraryExercise("Seated Cable Row", "Back", "Cable",
+            "Chest up · drive elbows back · squeeze at the ribs"),
+        LibraryExercise("Dumbbell Row", "Back", "Dumbbell",
+            "Brace on a bench · pull to the hip · don't twist the torso"),
+        LibraryExercise("Bent Over Barbell Row", "Back", "Barbell", "Advanced",
+            "Hinge to ~45° · bar to the belly · neutral spine"),
+        LibraryExercise("Pull Up", "Back", "Bodyweight", "Advanced",
+            "Dead hang · pull chin over the bar · use a band if needed"),
+        LibraryExercise("Chest Supported Row", "Back", "Machine",
+            "Chest stays on the pad · pull to the ribs · don't shrug"),
+        LibraryExercise("Straight Arm Pulldown", "Back", "Cable", "Beginner",
+            "Arms long · sweep the bar to the thighs · feel the lats"),
+
+        // ── SHOULDERS ────────────────────────────────────────────────────────────
+        LibraryExercise("Overhead Press", "Shoulders", "Barbell", "Advanced",
+            "Bar to upper chest · press straight up · keep the ribs down"),
+        LibraryExercise("Dumbbell Shoulder Press", "Shoulders", "Dumbbell",
+            "Neutral grip · elbows 30° forward · stop shy of lockout"),
+        LibraryExercise("Dumbbell Lateral Raise", "Shoulders", "Dumbbell", "Beginner",
+            "Lead with the elbows · pause at shoulder height"),
+        LibraryExercise("Cable Lateral Raise", "Shoulders", "Cable", "Beginner",
+            "Constant tension · slow lower · don't swing"),
+        LibraryExercise("Reverse Pec Deck", "Shoulders", "Machine", "Beginner",
+            "Arms slightly bent · open wide · pause at end range"),
+        LibraryExercise("Face Pull", "Shoulders", "Cable", "Beginner",
+            "Rope to the forehead · external rotation at the end"),
+
+        // ── ARMS ───────────────────────────────────────────────────────────────
+        LibraryExercise("Dumbbell Bicep Curl", "Arms", "Dumbbell", "Beginner",
+            "Elbows still · full stretch · 1 s squeeze · no swinging"),
+        LibraryExercise("Hammer Curl", "Arms", "Dumbbell", "Beginner",
+            "Neutral grip · thumbs up · control the lower"),
+        LibraryExercise("EZ Bar Curl", "Arms", "Barbell",
+            "Elbows tucked · full stretch · don't swing"),
+        LibraryExercise("Tricep Pushdown", "Arms", "Cable", "Beginner",
+            "Elbows pinned to the ribs · full extension · slow 2 s eccentric"),
+        LibraryExercise("Overhead Tricep Extension", "Arms", "Cable",
+            "Elbows tight to the head · full stretch at the bottom"),
+        LibraryExercise("Tricep Dip", "Arms", "Bodyweight",
+            "Lean slightly forward · lower to ~90° · don't shrug"),
+
+        // ── LEGS ───────────────────────────────────────────────────────────────
+        LibraryExercise("Goblet Squat", "Legs", "Dumbbell",
+            "DB at the chest · sit back to a box at parallel · drive through heels"),
+        LibraryExercise("Leg Press", "Legs", "Machine",
+            "Feet high & wide · stop ~90° · don't round the lower back"),
+        LibraryExercise("Romanian Deadlift", "Legs", "Barbell", "Advanced",
+            "Soft knees · push the hips back · bar slides down the thighs"),
+        LibraryExercise("Reverse Lunge", "Legs", "Dumbbell",
+            "Step back · front shin vertical · push through the front heel"),
+        LibraryExercise("Leg Extension", "Legs", "Machine", "Beginner",
+            "Lighter than ego says · 2 s pause at the top"),
+        LibraryExercise("Seated Leg Curl", "Legs", "Machine", "Beginner",
+            "Toes neutral · 2 s squeeze · slow eccentric"),
+        LibraryExercise("Bulgarian Split Squat", "Legs", "Dumbbell", "Advanced",
+            "Rear foot elevated · drop straight down · weight on the front heel"),
+        LibraryExercise("Standing Calf Raise", "Legs", "Machine", "Beginner",
+            "Full stretch at the bottom · 1 s squeeze on top · don't bounce"),
+
+        // ── GLUTES ──────────────────────────────────────────────────────────────
+        LibraryExercise("Barbell Hip Thrust", "Glutes", "Barbell",
+            "Bar over the hips · chin tucked · drive hips up · 1 s squeeze"),
+        LibraryExercise("Cable Glute Kickback", "Glutes", "Cable", "Beginner",
+            "Slight forward lean · drive the heel up and back · squeeze 1 s"),
+        LibraryExercise("Glute Bridge", "Glutes", "Bodyweight", "Beginner",
+            "Heels close · drive hips up · squeeze hard at the top"),
+        LibraryExercise("Hip Abduction Machine", "Glutes", "Machine", "Beginner",
+            "Lean forward slightly · push knees out · control the return"),
+
+        // ── CORE ────────────────────────────────────────────────────────────────
+        LibraryExercise("Plank", "Core", "Bodyweight", "Beginner",
+            "Forearms down · squeeze glutes · ribs down · don't sag"),
+        LibraryExercise("Hanging Knee Raise", "Core", "Bodyweight",
+            "Curl the pelvis up · control the lower · no swinging"),
+        LibraryExercise("Cable Crunch", "Core", "Cable", "Beginner",
+            "Round the spine toward the knees · exhale hard · slow return"),
+        LibraryExercise("Russian Twist", "Core", "Bodyweight", "Beginner",
+            "Lean back · rotate fully side to side · control every twist"),
+        LibraryExercise("Mountain Climber", "Core", "Bodyweight",
+            "Plank position · drive knees fast · hips low"),
+
+        // ── CARDIO / CONDITIONING (fat-loss burners) ─────────────────────────────
+        LibraryExercise("Treadmill Incline Walk", "Cardio", "Machine", "Beginner",
+            "Incline 8–12% · 5–6 km/h · the steady fat-burner"),
+        LibraryExercise("Jumping Jack", "Cardio", "Bodyweight", "Beginner",
+            "Full range · steady rhythm · great warm-up or finisher"),
+        LibraryExercise("High Knees", "Cardio", "Bodyweight", "Beginner",
+            "Drive knees to hip height · stay light on the feet"),
+        LibraryExercise("Burpee", "Cardio", "Bodyweight", "Advanced",
+            "Chest to floor · explode up · scale by stepping if knees complain"),
+        LibraryExercise("Kettlebell Swing", "Cardio", "Kettlebell",
+            "Hinge, don't squat · snap the hips · bell floats to chest height"),
+        LibraryExercise("Rowing Machine", "Cardio", "Machine", "Beginner",
+            "Legs → back → arms · big calorie burn, easy on the knees"),
+        LibraryExercise("Battle Ropes", "Cardio", "Bodyweight",
+            "Athletic stance · fast alternating waves · brace the core")
     )
 
     // ─── Helpers to keep the plan compact ──────────────────────────────────────
