@@ -600,29 +600,32 @@ object AppContent {
 
     // ─── Plan generator ────────────────────────────────────────────────────────
     //
-    // 12-week, 6-day-per-week Push/Pull/Legs split tuned for a 115 kg user with
-    // sensitive knees who wants accelerated fat loss without sacrificing muscle.
+    // 12-week, 3-day-per-week FULL-BODY split for a 28 y/o · 1.89 m · 115 kg user
+    // chasing predictable fat loss (115 → ~105 kg by September, 90-95 kg long term)
+    // while holding onto muscle. Pairs with 2 400 kcal / 180 g protein and a daily
+    // 30-45 min walk on the OFF days (see the "daily walk" tip).
     //
-    // Day rotation (fixed across all 12 weeks):
-    //   Day 1 — Push A (chest focus)
-    //   Day 2 — Pull A (back width)
-    //   Day 3 — Legs A (quad/glute, knee-safe)
-    //   Day 4 — Push B (shoulder focus)
-    //   Day 5 — Pull B (back thickness)
-    //   Day 6 — Legs B (hamstring/glute hinge)
+    // Day rotation (Mon / Wed / Fri, fixed across all 12 weeks):
+    //   Day 1 — Full Body A · Squat & Push   (squat · push-up · row · plank)
+    //   Day 2 — Full Body B · Hinge & Press  (deadlift · shoulder press · lunge · abs)
+    //   Day 3 — Full Body C · Balanced        (leg press · incline press · pulldown · core)
+    // This maps the consultation's Mon/Wed/Fri exercises onto three balanced
+    // full-body sessions so every major pattern is hit ~3×/week.
     //
     // What changes is the *intensity*, captured by [PhaseSpec]:
     //   Weeks 1–4   Foundation       3 sets, 10–12 reps, 60–90 s rest
     //   Weeks 5–8   Intensification  4 sets, 8–10 reps, 50–75 s rest, drop set last
     //   Weeks 9–12  Metabolic Peak   4 sets + supersets, 40–60 s rest, longer cardio
     //
-    // Knee-safety rules baked in:
-    //   • No barbell back squat, no jump squats, no burpees, no plyo lunges.
-    //   • Leg press / hack squat capped at ~90° knee flexion (form notes say so).
-    //   • Primary leg work is hip-dominant (RDL, hip thrust) and machine-based.
+    // Knee-safety rules baked in (the consultation lists squats/lunges/deadlift,
+    // so we keep them but in their most joint-friendly form):
+    //   • Goblet / box squat over barbell back squat · sit back to a box.
+    //   • Reverse lunges (not forward / jumping) to keep shear off the knee.
+    //   • Hinge work (RDL) is hip-dominant; depth always controlled.
     //
-    // Cardio is a LISS finisher (incline walk) on every day; weeks 9–12 swap a
-    // couple of finishers for HIIT bike intervals for a stronger metabolic kick.
+    // Cardio is a LISS finisher (incline walk) on every training day; weeks 9–12
+    // swap to HIIT bike intervals for a stronger metabolic kick. On the 4 non-
+    // training days, the plan asks for a 30-45 min walk (8 000-10 000 steps).
 
     private data class PhaseSpec(
         val name: String,
@@ -686,97 +689,44 @@ object AppContent {
 
     // ─── Day templates ─────────────────────────────────────────────────────────
 
-    private fun pushA(week: Int): WorkoutDay {
+    /** Plank hold time scales gently across the three phases. */
+    private fun plankSeconds(p: PhaseSpec): String = when (p.name) {
+        "Foundation" -> "30–40 s"
+        "Intensification" -> "40–50 s"
+        else -> "50–60 s"
+    }
+
+    // ─── Day templates · 3-day full-body ─────────────────────────────────────────
+    //
+    // Mon (Day 1) Squats · Push-ups · Rows · Plank
+    // Wed (Day 2) Deadlift · Shoulder press · Lunges · Abs
+    // Fri (Day 3) Balanced full body (leg press · incline press · pulldown · core)
+
+    private fun fullBodyA(week: Int): WorkoutDay {
         val p = phaseFor(week)
         return WorkoutDay(
             weekNumber = week, dayNumber = 1,
-            name = "Push A · Chest Focus",
-            type = "Strength", focus = "Chest · Shoulders · Triceps",
-            estimatedMinutes = 65,
-            caloriesBurned = 470 + p.cardioKcal,
+            name = "Full Body A · Squat & Push",
+            type = "Strength", focus = "Legs · Chest · Back · Core",
+            estimatedMinutes = 60,
+            caloriesBurned = 520 + p.cardioKcal,
             exercises = listOf(
                 warmUpTreadmill(5),
-                mobility(),
-                Exercise("Barbell Bench Press", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Chest", "Plant feet · pinch shoulder blades · bar to lower chest · controlled descent",
-                    difficulty = "Advanced"),
-                Exercise("Incline DB Press (30°)", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Upper Chest", "DBs press up and slightly in · full ROM at the bottom · don't bounce",
-                    difficulty = "Medium"),
-                Exercise("Cable Chest Fly (High to Low)", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Chest", "Slight elbow bend · meet in front of hips · 1 s squeeze",
-                    modification = mod(p.dropSetNote), difficulty = "Medium"),
-                Exercise("Seated DB Shoulder Press", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Shoulders", "Neutral grip · elbows 30° forward · stop just shy of lockout",
-                    difficulty = "Medium"),
-                Exercise("Cable Tricep Pushdown", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Triceps", "Elbows pinned to ribs · full extension · slow 2 s eccentric",
-                    modification = mod(p.supersetNote), difficulty = "Beginner"),
-                phaseCardio(p),
-                coolDown()
-            )
-        )
-    }
-
-    private fun pullA(week: Int): WorkoutDay {
-        val p = phaseFor(week)
-        return WorkoutDay(
-            weekNumber = week, dayNumber = 2,
-            name = "Pull A · Back Width",
-            type = "Strength", focus = "Back · Biceps",
-            estimatedMinutes = 65,
-            caloriesBurned = 460 + p.cardioKcal,
-            exercises = listOf(
-                warmUpTreadmill(5),
-                mobility(),
-                Exercise("Lat Pulldown (Wide Grip)", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Lats", "Pull bar to upper chest · drive elbows down · stretch at top",
-                    difficulty = "Medium"),
-                Exercise("Seated Cable Row (V-Handle)", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Mid Back", "Chest up · drive elbows back · pause + squeeze at the ribs",
-                    difficulty = "Medium"),
-                Exercise("Single-Arm DB Row", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Lats/Mid Back", "Brace on bench · pull to hip · don't twist torso",
-                    difficulty = "Medium"),
-                Exercise("Face Pull (Cable Rope)", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Rear Delts/Upper Back", "Rope to forehead · external rotation at the end · feel rear delts",
-                    modification = mod(p.dropSetNote), difficulty = "Beginner"),
-                Exercise("Incline DB Curl", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Biceps", "Bench 45° · let arms hang straight down · full stretch, full squeeze",
-                    modification = mod(p.supersetNote), difficulty = "Beginner"),
-                phaseCardio(p),
-                coolDown()
-            )
-        )
-    }
-
-    private fun legsA(week: Int): WorkoutDay {
-        val p = phaseFor(week)
-        return WorkoutDay(
-            weekNumber = week, dayNumber = 3,
-            name = "Legs A · Quad & Glute",
-            type = "Strength", focus = "Quads · Glutes · Calves",
-            estimatedMinutes = 70,
-            caloriesBurned = 580 + p.cardioKcal,
-            exercises = listOf(
-                warmUpTreadmill(6),
                 Exercise("Knee Prep Mobility", 1, "5 min", 0, "Mobility",
                     "Banded knee circles · controlled BW squats to box · hip flexor stretch · ankle pumps",
                     difficulty = "Beginner"),
-                Exercise("Leg Press (Feet High & Wide)", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Quads/Glutes", "Stop at ~90° knee flexion · DO NOT round lower back · drive through heels",
+                Exercise("Goblet Squat (to Box)", p.compoundSets, p.compoundReps, p.restCompoundSec,
+                    "Quads/Glutes", "Hold a DB at the chest · sit back to a box at parallel · drive through heels · chest tall",
                     difficulty = "Medium"),
-                Exercise("Hip Thrust (Barbell)", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Glutes", "Bar over hips · chin tucked · drive hips to ceiling · 1 s squeeze at top",
-                    difficulty = "Medium"),
-                Exercise("Hack Squat Machine", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Quads", "Limit depth to thighs parallel · slow 3 s eccentric · push through whole foot",
-                    difficulty = "Medium"),
-                Exercise("Leg Extension (Light & Controlled)", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Quads", "Lighter than ego says · 2 s pause at top · stop if it bites the knee cap",
-                    modification = mod(p.dropSetNote), difficulty = "Beginner"),
-                Exercise("Standing Calf Raise (Machine)", p.isoSets, "15", p.restIsoSec,
-                    "Calves", "Full stretch at the bottom · 1 s squeeze on top · don't bounce",
+                Exercise("Push-Up", p.compoundSets, p.compoundReps, p.restCompoundSec,
+                    "Chest", "Hands under shoulders · body in a straight line · chest to fists · elevate hands on a bench if too hard",
+                    modification = "Too easy? Slow the descent to 3 s. Too hard? Hands on a bench or knees down.",
+                    difficulty = "Beginner"),
+                Exercise("Seated Cable Row (V-Handle)", p.compoundSets, p.compoundReps, p.restCompoundSec,
+                    "Mid Back", "Chest up · drive elbows back · pause + squeeze at the ribs",
+                    modification = mod(p.dropSetNote), difficulty = "Medium"),
+                Exercise("Front Plank", p.isoSets, plankSeconds(p), p.restIsoSec,
+                    "Core", "Forearms down · squeeze glutes · ribs down · don't let the hips sag",
                     modification = mod(p.supersetNote), difficulty = "Beginner"),
                 phaseCardio(p),
                 coolDown()
@@ -784,97 +734,62 @@ object AppContent {
         )
     }
 
-    private fun pushB(week: Int): WorkoutDay {
+    private fun fullBodyB(week: Int): WorkoutDay {
         val p = phaseFor(week)
         return WorkoutDay(
-            weekNumber = week, dayNumber = 4,
-            name = "Push B · Shoulder Focus",
-            type = "Strength", focus = "Shoulders · Chest · Triceps",
-            estimatedMinutes = 65,
-            caloriesBurned = 470 + p.cardioKcal,
+            weekNumber = week, dayNumber = 2,
+            name = "Full Body B · Hinge & Press",
+            type = "Strength", focus = "Hamstrings · Glutes · Shoulders · Core",
+            estimatedMinutes = 60,
+            caloriesBurned = 530 + p.cardioKcal,
             exercises = listOf(
                 warmUpTreadmill(5),
-                mobility(),
-                Exercise("Seated Barbell Shoulder Press", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Shoulders", "Back flat on pad · bar to upper chest · press straight up · keep ribs down",
-                    difficulty = "Advanced"),
-                Exercise("Incline Bench Press (45°)", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Upper Chest", "Bar to upper chest line · elbows ~45° · full ROM",
-                    difficulty = "Medium"),
-                Exercise("DB Lateral Raise", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Side Delts", "Lead with the elbows · DBs slightly forward · pause at shoulder height",
-                    modification = mod(p.dropSetNote), difficulty = "Beginner"),
-                Exercise("Cable Chest Fly (Low to High)", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Upper Chest", "Sweep up and across · meet at chin level · squeeze inner chest",
-                    difficulty = "Medium"),
-                Exercise("Overhead Cable Tricep Extension", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Triceps", "Elbows tight to head · full stretch at the bottom · slow extension",
-                    modification = mod(p.supersetNote), difficulty = "Beginner"),
-                phaseCardio(p),
-                coolDown()
-            )
-        )
-    }
-
-    private fun pullB(week: Int): WorkoutDay {
-        val p = phaseFor(week)
-        return WorkoutDay(
-            weekNumber = week, dayNumber = 5,
-            name = "Pull B · Back Thickness",
-            type = "Strength", focus = "Back · Rear Delts · Biceps",
-            estimatedMinutes = 65,
-            caloriesBurned = 470 + p.cardioKcal,
-            exercises = listOf(
-                warmUpTreadmill(5),
-                mobility(),
-                Exercise("Bent-Over Barbell Row (Underhand)", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Mid Back/Lats", "Hinge to ~45° · bar to belly · pinch shoulder blades · neutral spine",
-                    difficulty = "Advanced"),
-                Exercise("Chest-Supported Row Machine", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Mid Back", "Chest stays on pad · pull to ribs · don't shrug",
-                    difficulty = "Medium"),
-                Exercise("Reverse-Grip Lat Pulldown", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Lats/Biceps", "Underhand · pull to lower chest · drive elbows down and back",
-                    difficulty = "Medium"),
-                Exercise("Reverse Pec Deck", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Rear Delts", "Arms slightly bent · open wide · pause at end range",
-                    modification = mod(p.dropSetNote), difficulty = "Beginner"),
-                Exercise("EZ-Bar Preacher Curl", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Biceps", "Full stretch at the bottom · don't bounce off the pad · 1 s squeeze",
-                    modification = mod(p.supersetNote), difficulty = "Medium"),
-                phaseCardio(p),
-                coolDown()
-            )
-        )
-    }
-
-    private fun legsB(week: Int): WorkoutDay {
-        val p = phaseFor(week)
-        return WorkoutDay(
-            weekNumber = week, dayNumber = 6,
-            name = "Legs B · Hamstring & Glute Hinge",
-            type = "Strength", focus = "Hamstrings · Glutes · Calves",
-            estimatedMinutes = 70,
-            caloriesBurned = 560 + p.cardioKcal,
-            exercises = listOf(
-                warmUpTreadmill(6),
                 Exercise("Hinge Prep Mobility", 1, "5 min", 0, "Mobility",
                     "Cat-cow · hip airplanes · banded good-mornings · hamstring sweep",
                     difficulty = "Beginner"),
                 Exercise("Romanian Deadlift (Barbell)", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Hamstrings/Glutes", "Soft knees · push hips back · bar slides down thighs · stop when hamstrings shout",
+                    "Hamstrings/Glutes", "Soft knees · push hips back · bar slides down thighs · flat back · stop when hamstrings shout",
                     difficulty = "Advanced"),
-                Exercise("Barbell Hip Thrust (Heavy)", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Glutes", "Heavier than Legs A · pause 2 s at the top · ribs down",
+                Exercise("Seated DB Shoulder Press", p.compoundSets, p.compoundReps, p.restCompoundSec,
+                    "Shoulders", "Back flat on pad · neutral grip · elbows 30° forward · stop just shy of lockout",
                     difficulty = "Medium"),
-                Exercise("Seated Leg Curl Machine", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Hamstrings", "Toes neutral · 2 s squeeze at peak · slow eccentric",
+                Exercise("Reverse Lunge (DBs)", p.compoundSets, "10/leg", p.restCompoundSec,
+                    "Quads/Glutes", "Step BACK (kinder on the knee) · front shin vertical · push through the front heel",
+                    modification = mod(p.dropSetNote), difficulty = "Medium"),
+                Exercise("Hanging / Lying Knee Raise", p.isoSets, p.isoReps, p.restIsoSec,
+                    "Abs", "Curl the pelvis up · control the lower · no swinging · lie on the floor if the bar is too much",
+                    modification = mod(p.supersetNote), difficulty = "Beginner"),
+                phaseCardio(p),
+                coolDown()
+            )
+        )
+    }
+
+    private fun fullBodyC(week: Int): WorkoutDay {
+        val p = phaseFor(week)
+        return WorkoutDay(
+            weekNumber = week, dayNumber = 3,
+            name = "Full Body C · Balanced",
+            type = "Strength", focus = "Full Body",
+            estimatedMinutes = 60,
+            caloriesBurned = 520 + p.cardioKcal,
+            exercises = listOf(
+                warmUpTreadmill(6),
+                mobility(),
+                Exercise("Leg Press (Feet High & Wide)", p.compoundSets, p.compoundReps, p.restCompoundSec,
+                    "Quads/Glutes", "Stop at ~90° knee flexion · DO NOT round lower back · drive through heels",
+                    difficulty = "Medium"),
+                Exercise("Incline DB Press (30°)", p.compoundSets, p.compoundReps, p.restCompoundSec,
+                    "Upper Chest", "DBs press up and slightly in · full ROM at the bottom · don't bounce",
+                    difficulty = "Medium"),
+                Exercise("Lat Pulldown (Wide Grip)", p.compoundSets, p.compoundReps, p.restCompoundSec,
+                    "Lats", "Pull bar to upper chest · drive elbows down · stretch at top",
+                    difficulty = "Medium"),
+                Exercise("DB Lateral Raise", p.isoSets, p.isoReps, p.restIsoSec,
+                    "Side Delts", "Lead with the elbows · DBs slightly forward · pause at shoulder height",
                     modification = mod(p.dropSetNote), difficulty = "Beginner"),
-                Exercise("Cable Glute Kickback", p.isoSets, "12/leg", p.restIsoSec,
-                    "Glutes", "Slight forward lean · drive heel up and back · squeeze 1 s",
-                    difficulty = "Beginner"),
-                Exercise("Seated Calf Raise", p.isoSets, "15", p.restIsoSec,
-                    "Calves/Soleus", "Knees over toes · full stretch · controlled tempo",
+                Exercise("Cable Crunch", p.isoSets, p.isoReps, p.restIsoSec,
+                    "Abs", "Round the spine down towards the knees · exhale hard · slow return",
                     modification = mod(p.supersetNote), difficulty = "Beginner"),
                 phaseCardio(p),
                 coolDown()
@@ -883,7 +798,7 @@ object AppContent {
     }
 
     val workoutPlan: List<WorkoutDay> = (1..12).flatMap { week ->
-        listOf(pushA(week), pullA(week), legsA(week), pushB(week), pullB(week), legsB(week))
+        listOf(fullBodyA(week), fullBodyB(week), fullBodyC(week))
     }
 
     val motivationalTips = listOf(
@@ -899,6 +814,9 @@ object AppContent {
         "🥩 Eat protein every 3–4 hours · muscle stays, fat goes.",
         "📉 You don't out-train a bad diet — track the calories.",
         "💊 Creatine: 5 g daily, every day, with any meal. Consistency > timing.",
-        "🥗 Cheap, simple, repeated. That's how you lose weight."
+        "🥗 Cheap, simple, repeated. That's how you lose weight.",
+        "🚶 Off-day rule: 30–45 min walk · aim 8 000–10 000 steps. The walks are where the fat goes.",
+        "📅 3 lifts a week (Mon/Wed/Fri) is plenty — recovery is when you actually change.",
+        "🎯 The target isn't abs in 3 months. It's 115 → ~105 kg by September, muscle intact."
     )
 }
