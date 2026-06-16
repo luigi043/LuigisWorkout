@@ -744,37 +744,6 @@ object AppContent {
             difficulty = "Beginner")
 
     // ─── Plan generator ────────────────────────────────────────────────────────
-    //
-    // 12-week, 5-day-per-week split for a 28 y/o · 1.89 m · 115 kg user chasing
-    // predictable FAT LOSS (115 → ~105 kg by September, 90-95 kg long term) while
-    // holding onto muscle. Pairs with 2 400 kcal / 180 g protein and a 30-45 min
-    // walk on the 2 OFF days (see the "off-day walk" tip).
-    //
-    // Day rotation (Mon-Fri, fixed across all 12 weeks) — every major muscle hit
-    // ~2×/week, 6 working movements per day for high training volume:
-    //   Day 1 — Push   · Chest / Shoulders / Triceps
-    //   Day 2 — Pull   · Back / Biceps
-    //   Day 3 — Legs   · Quads / Glutes / Hamstrings / Calves
-    //   Day 4 — Shoulders & Arms · Delts / Biceps / Triceps / Core
-    //   Day 5 — Full Body Conditioning · big lifts + core, longest cardio
-    //
-    // Exercise names are kept standard so the in-app "View Example" lands on the
-    // matching musclewiki.com demo for each one.
-    //
-    // What changes is the *intensity*, captured by [PhaseSpec]:
-    //   Weeks 1–4   Foundation       3 sets, 10–12 reps, 60–90 s rest
-    //   Weeks 5–8   Intensification  4 sets, 8–10 reps, 50–75 s rest, drop set last
-    //   Weeks 9–12  Metabolic Peak   4 sets + supersets, 40–60 s rest, longer cardio
-    //
-    // Knee-safety rules baked in (we keep squats/lunges/deadlift, joint-friendly):
-    //   • Goblet / box squat over barbell back squat · sit back to a box.
-    //   • Reverse lunges (not forward / jumping) to keep shear off the knee.
-    //   • Hinge work (RDL) is hip-dominant; depth always controlled.
-    //
-    // Cardio is a LISS finisher (incline walk) on every training day; weeks 9–12
-    // swap to HIIT bike intervals for a stronger metabolic kick. On the 2 non-
-    // training days, the plan asks for a 30-45 min walk (8 000-10 000 steps).
-
     private data class PhaseSpec(
         val name: String,
         val compoundSets: Int,
@@ -835,20 +804,12 @@ object AppContent {
 
     private fun mod(note: String) = note  // tiny alias so the call sites read cleanly
 
-    // ─── Day templates ─────────────────────────────────────────────────────────
-
     /** Plank hold time scales gently across the three phases. */
     private fun plankSeconds(p: PhaseSpec): String = when (p.name) {
         "Foundation" -> "30–40 s"
         "Intensification" -> "40–50 s"
         else -> "50–60 s"
     }
-
-    // ─── Day templates · 5-day split ─────────────────────────────────────────────
-    //
-    // Day 1 Push · Day 2 Pull · Day 3 Legs · Day 4 Shoulders & Arms · Day 5 Full Body.
-    // 6 working movements each (plus warm-up + cardio finisher) for high fat-loss
-    // volume. Exercise names match musclewiki.com so "View Example" works.
 
     private fun pushDay(week: Int): WorkoutDay {
         val p = phaseFor(week)
@@ -962,40 +923,40 @@ object AppContent {
         return WorkoutDay(
             weekNumber = week, dayNumber = 4,
             name = "Shoulders & Arms (Dumbbell Only)",
-            type = "Strength", focus = "Shoulders · Biceps · Triceps · Forearms",
-            estimatedMinutes = 65,
+            type = "Hypertrophy", focus = "Shoulders · Biceps · Triceps · Forearms",
+            estimatedMinutes = 60,
             caloriesBurned = 480 + p.cardioKcal,
             exercises = listOf(
                 // --- Warm-Up (3 Rounds) ---
                 Exercise("Wrist Curls", 3, "20", 30, "Forearms",
-                    "Pump forearms early · seated · palms up", difficulty = "Beginner"),
+                    "Forearm-focused warm-up to prepare for the subsequent movements.", difficulty = "Beginner"),
                 Exercise("Supinated Wrist Curls", 3, "20", 30, "Forearms",
                     "Seated · palms down", difficulty = "Beginner"),
                 Exercise("Farmer Walks", 3, "40 s", 45, "Forearms/Grip",
-                    "Challenges grip and engages the entire arm · walk tall", difficulty = "Beginner"),
+                    "Challenge grip and engage the entire arm.", difficulty = "Beginner"),
 
                 // --- Main Routine (3 Rounds) ---
                 Exercise("Cross Curls", 3, "20", p.restIsoSec, "Biceps",
-                    "Keep hands slightly forward to engage the biceps from the start", difficulty = "Medium"),
+                    "Hands held slightly forward to increase bicep engagement.", difficulty = "Medium"),
                 Exercise("Isometric Bicep Curls", 3, "10/arm", p.restIsoSec, "Biceps",
-                    "Rest arm against a surface · full extensions · zero momentum", difficulty = "Medium"),
+                    "Performed with the arm resting against a surface to ensure movement is strictly driven by bicep.", difficulty = "Medium"),
 
                 Exercise("Tricep Kickbacks", 3, "12", p.restIsoSec, "Triceps",
                     "Keep upper arm horizontal · full extension", difficulty = "Beginner"),
                 Exercise("Overhead Tricep Extensions", 3, "12", p.restIsoSec, "Triceps",
-                    "Elbows up · lower weight slowly", difficulty = "Medium"),
+                    "Lower the weight slowly while keeping elbows up.", difficulty = "Medium"),
 
                 Exercise("Dumbbell Skies", 3, "12", p.restIsoSec, "Shoulders",
-                    "Targets rear delts · back flat · feet shoulder-width", difficulty = "Medium"),
+                    "Target the rear delts with a flat back and feet shoulder-width apart.", difficulty = "Medium"),
                 Exercise("Hammer Press", 3, "10", p.restIsoSec, "Shoulders/Arms",
-                    "Hammer curl into military press · core tight · no swinging", difficulty = "Medium"),
+                    "Combining a hammer curl with a military press.", difficulty = "Medium"),
                 Exercise("Lateral Raises", 3, "12", p.restIsoSec, "Shoulders",
-                    "Build side medial delts for roundness · lead with elbows", difficulty = "Beginner"),
+                    "Performed to build the side medial delts and create shoulder roundness.", difficulty = "Beginner"),
                 Exercise("Reverse Flyes", 3, "10", p.restIsoSec, "Shoulders",
-                    "Lean forward · straight back · target rear delts", difficulty = "Medium"),
+                    "Leaning forward with a straight back to target the rear delts.", difficulty = "Medium"),
 
                 Exercise("Upright Rows", 3, "10", p.restIsoSec, "Full Arms",
-                    "Hits all arm muscles · slight lean forward for greater ROM", difficulty = "Medium"),
+                    "Requires all the muscles in the arm to work together. Slight forward lean recommended for greater ROM.", difficulty = "Medium"),
 
                 phaseCardio(p),
                 coolDown()

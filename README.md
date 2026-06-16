@@ -26,23 +26,33 @@
 - **5-Day Split:** Push, Pull, Legs, Shoulders & Arms (Dumbbell Focus), and Full Body Conditioning.
 
 ### 🦾 Detailed Shoulder & Arms Routine (Dumbbell Only)
-To build bigger arms using only dumbbells, this plan focuses on **increasing volume** (sets, reps, or weight) and **stimulating all muscle groups**—shoulders, biceps, triceps, and forearms—consistently.
+The workout routine consists of a warm-up and a main circuit targeting the biceps, triceps, and shoulders.
 
-#### **The Foundational Principles**
-*   **Nutrition:** Consume enough **calories and protein** to fuel muscle growth.
-*   **Recovery:** Prioritize **proper sleep** to allow muscle fibers to repair and grow back thicker and stronger after they are torn during training.
-*   **Muscle Targeting:** Ensure you target all aspects of a muscle group (e.g., frontal, medial, and rear delts for shoulders) to build aesthetic, full arms.
+#### **Warm-Up (3 Rounds)**
+The routine begins with a forearm-focused warm-up to prepare for the subsequent movements.
+*   **Wrist Curls:** 20 reps.
+*   **Supinated Wrist Curls:** 20 reps.
+*   **Farmer Walks:** 40 seconds to challenge grip and engage the entire arm.
 
-#### **The Warm-Up (Perform 3 Rounds)**
-1.  **Wrist Curls:** 20 reps.
-2.  **Supinated Wrist Curls:** 20 reps.
-3.  **Farmer Walks:** 40 seconds.
+#### **Main Routine (3 Rounds)**
+After the warm-up, the main circuit targets all aspects of the arm.
 
-#### **The Main Routine (Perform 3 Rounds)**
-*   **Bicep Focus:** Cross Curls (20 reps), Isometric Bicep Curls (10 reps/arm).
-*   **Tricep Focus:** Tricep Kickbacks (12 reps), Overhead Tricep Extensions (12 reps).
-*   **Shoulder Focus:** Dumbbell Skies (12 reps), Hammer Press (10 reps), Lateral Raises (12 reps), Reverse Flyes (10 reps).
-*   **Full Arm Finisher:** Upright Rows (10 reps).
+**Bicep Exercises**
+*   **Cross Curls:** 20 reps with hands held slightly forward to increase bicep engagement.
+*   **Isometric Bicep Curls:** 10 reps per arm. These are performed with the arm resting against a surface to ensure the movement is strictly driven by the bicep rather than momentum.
+
+**Tricep Exercises**
+*   **Tricep Kickbacks:** 12 reps.
+*   **Overhead Tricep Extensions:** 12 reps, lowering the weight slowly while keeping elbows up.
+
+**Shoulder Exercises**
+*   **Dumbbell Skies:** 12 reps, targeting the rear delts with a flat back and feet shoulder-width apart.
+*   **Hammer Press:** 10 reps, combining a hammer curl with a military press.
+*   **Lateral Raises:** Performed to build the side medial delts and create shoulder roundness.
+*   **Reverse Flyes:** 10 reps, leaning forward with a straight back to target the rear delts.
+
+**Full Arm Finisher**
+*   **Upright Rows:** 10 reps. This final exercise requires all the muscles in the arm to work together. A slight forward lean is recommended to allow for a greater range of motion.
 
 ---
 - **MuscleWiki Integration:** One-tap access to professional exercise demonstrations for every movement.
