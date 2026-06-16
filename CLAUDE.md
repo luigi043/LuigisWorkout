@@ -36,7 +36,7 @@ Single-module Android app (min SDK 26, target SDK 34, Kotlin + KSP).
 
 ### Data layer
 
-- **`AppContent.kt`** — compile-time static data: all `Recipe` objects, `WorkoutDay` plan, `foodDatabase` (`FoodItem` list), and motivational tips. This is the source of truth for workout and recipe content; it is never stored in Room.
+- **`AppContent.kt`** — compile-time static data: all `Recipe` objects, `WorkoutDay` plan (12-week cycle with three phases: Foundation, Intensification, Metabolic Peak), `foodDatabase` (`FoodItem` list), and motivational tips. This is the source of truth for workout and recipe content; it is never stored in Room.
 - **`Entities.kt`** — seven Room entities: `MealLog`, `WeightLog`, `WorkoutLog`, `UserProfile` (singleton, `id=1`), `DailyGoal` (keyed by date string `"yyyy-MM-dd"`), `ShoppingItem`, `ExerciseLog`.
 - **`AppDatabase`** — Room singleton, version 3, uses `fallbackToDestructiveMigration` for dev (schema changes wipe local data — replace with proper Room migrations before shipping a release build).
 - **`AppRepository`** — single repository, instantiated once in `LuigisWorkoutApp.repository` and injected into every ViewModel through `appViewModelFactory`. All suspend functions dispatch to `Dispatchers.IO`. Returns `LiveData` for reactive queries and `suspend` functions for one-shot writes. Read-modify-write fields (e.g. `adjustWaterCount`) are atomic inside a single IO coroutine.
