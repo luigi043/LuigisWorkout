@@ -961,31 +961,42 @@ object AppContent {
         val p = phaseFor(week)
         return WorkoutDay(
             weekNumber = week, dayNumber = 4,
-            name = "Shoulders & Arms",
-            type = "Strength", focus = "Shoulders · Biceps · Triceps · Core",
+            name = "Shoulders & Arms (Dumbbell Only)",
+            type = "Strength", focus = "Shoulders · Biceps · Triceps · Forearms",
             estimatedMinutes = 65,
             caloriesBurned = 480 + p.cardioKcal,
             exercises = listOf(
-                warmUpTreadmill(5),
-                mobility(),
-                Exercise("Seated Barbell Shoulder Press", p.compoundSets, p.compoundReps, p.restCompoundSec,
-                    "Shoulders", "Back flat on the pad · bar to upper chest · press straight up · keep the ribs down",
-                    difficulty = "Advanced"),
-                Exercise("Dumbbell Lateral Raise", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Side Delts", "Lead with the elbows · DBs slightly forward · pause at shoulder height",
-                    difficulty = "Beginner"),
-                Exercise("Reverse Pec Deck", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Rear Delts", "Arms slightly bent · open wide · pause at end range",
-                    difficulty = "Beginner"),
-                Exercise("EZ Bar Curl", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Biceps", "Elbows tucked · full stretch at the bottom · don't swing · 1 s squeeze",
-                    difficulty = "Medium"),
-                Exercise("Overhead Tricep Extension", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Triceps", "Cable or DB · elbows tight to the head · full stretch at the bottom · slow extension",
-                    modification = mod(p.dropSetNote), difficulty = "Beginner"),
-                Exercise("Cable Crunch", p.isoSets, p.isoReps, p.restIsoSec,
-                    "Abs", "Round the spine down towards the knees · exhale hard · slow return",
-                    modification = mod(p.supersetNote), difficulty = "Beginner"),
+                // --- Warm-Up (3 Rounds) ---
+                Exercise("Wrist Curls", 3, "20", 30, "Forearms",
+                    "Pump forearms early · seated · palms up", difficulty = "Beginner"),
+                Exercise("Supinated Wrist Curls", 3, "20", 30, "Forearms",
+                    "Seated · palms down", difficulty = "Beginner"),
+                Exercise("Farmer Walks", 3, "40 s", 45, "Forearms/Grip",
+                    "Challenges grip and engages the entire arm · walk tall", difficulty = "Beginner"),
+
+                // --- Main Routine (3 Rounds) ---
+                Exercise("Cross Curls", 3, "20", p.restIsoSec, "Biceps",
+                    "Keep hands slightly forward to engage the biceps from the start", difficulty = "Medium"),
+                Exercise("Isometric Bicep Curls", 3, "10/arm", p.restIsoSec, "Biceps",
+                    "Rest arm against a surface · full extensions · zero momentum", difficulty = "Medium"),
+
+                Exercise("Tricep Kickbacks", 3, "12", p.restIsoSec, "Triceps",
+                    "Keep upper arm horizontal · full extension", difficulty = "Beginner"),
+                Exercise("Overhead Tricep Extensions", 3, "12", p.restIsoSec, "Triceps",
+                    "Elbows up · lower weight slowly", difficulty = "Medium"),
+
+                Exercise("Dumbbell Skies", 3, "12", p.restIsoSec, "Shoulders",
+                    "Targets rear delts · back flat · feet shoulder-width", difficulty = "Medium"),
+                Exercise("Hammer Press", 3, "10", p.restIsoSec, "Shoulders/Arms",
+                    "Hammer curl into military press · core tight · no swinging", difficulty = "Medium"),
+                Exercise("Lateral Raises", 3, "12", p.restIsoSec, "Shoulders",
+                    "Build side medial delts for roundness · lead with elbows", difficulty = "Beginner"),
+                Exercise("Reverse Flyes", 3, "10", p.restIsoSec, "Shoulders",
+                    "Lean forward · straight back · target rear delts", difficulty = "Medium"),
+
+                Exercise("Upright Rows", 3, "10", p.restIsoSec, "Full Arms",
+                    "Hits all arm muscles · slight lean forward for greater ROM", difficulty = "Medium"),
+
                 phaseCardio(p),
                 coolDown()
             )
@@ -1053,6 +1064,9 @@ object AppContent {
         "🚶 Off-day walk: 30–45 min · aim 8 000–10 000 steps. The walks are where the fat goes.",
         "📅 5 lifts a week + 2 walk days. Hit the sessions, protect the 2 rest days.",
         "🎯 The target isn't abs in 3 months. It's 115 → ~105 kg by September, muscle intact.",
-        "🔁 Every muscle trained twice a week — that's the volume that drives fat loss + shape."
+        "🔁 Every muscle trained twice a week — that's the volume that drives fat loss + shape.",
+        "🍎 Nutrition: Consume enough calories and protein to fuel muscle growth.",
+        "💤 Recovery: Prioritize proper sleep to allow muscle fibers to repair and grow back stronger.",
+        "🎯 Muscle Targeting: Hit all aspects (e.g., frontal, medial, rear delts) for aesthetic, full arms."
     )
 }
