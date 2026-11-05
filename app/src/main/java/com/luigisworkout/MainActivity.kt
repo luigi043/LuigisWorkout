@@ -13,7 +13,6 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.luigisworkout.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -50,16 +49,14 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         bottomNav.setupWithNavController(navController)
 
-        // Hide toolbar and bottom nav on certain destinations
+        // Secondary destinations keep the toolbar's Up button.
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.homeFragment, R.id.mealPlanFragment, R.id.workoutFragment,
                 R.id.exerciseLibraryFragment, R.id.progressFragment -> {
-                    binding.toolbar.visibility = View.VISIBLE
                     binding.bottomNavigation.visibility = View.VISIBLE
                 }
                 else -> {
-                    binding.toolbar.visibility = View.GONE
                     binding.bottomNavigation.visibility = View.GONE
                 }
             }

@@ -128,7 +128,10 @@
     <string name="check_daily_plan">Check your daily workout plan</string>
     <string name="meal_saved">✅ Meal saved!</string>
     <string name="enter_food_name">Enter food name</string>
-    <string name="enter_calories">Enter calories</string>
+    <string name="enter_calories">Enter calories as a whole number, zero or higher</string>
+    <string name="quantity_invalid">Enter a positive quantity that keeps the calorie total in range</string>
+    <string name="macro_invalid">Enter a non-negative number in grams</string>
+    <string name="weight_intro">Log your current weight to track changes over time.</string>
 
     <!-- Meal Plan Tabs -->
     <string name="tab_history_label">History</string>

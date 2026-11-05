@@ -238,7 +238,7 @@ class WeightHistoryAdapter : ListAdapter<WeightLog, WeightHistoryAdapter.ViewHol
         val item = getItem(position)
         holder.tvDate.text = item.date
         holder.tvWeight.text = String.format("%.1f kg", item.weightKg)
-        holder.tvBmi.text = "IMC: ${String.format("%.1f", item.bmi)}"
+        holder.tvBmi.text = "BMI: ${String.format("%.1f", item.bmi)}"
         if (item.note.isNotEmpty()) {
             holder.tvNote.visibility = View.VISIBLE
             holder.tvNote.text = item.note

@@ -34,11 +34,13 @@
             android:name="com.luigisworkout.ui.logmeal.LogMealActivity"
             android:exported="false"
             android:parentActivityName="com.luigisworkout.MainActivity"
+            android:theme="@style/Theme.LuigisWorkout.LogForm"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name="com.luigisworkout.ui.logweight.LogWeightActivity"
             android:exported="false"
+            android:theme="@style/Theme.LuigisWorkout.LogForm"
             android:parentActivityName="com.luigisworkout.MainActivity" />
 
         <provider

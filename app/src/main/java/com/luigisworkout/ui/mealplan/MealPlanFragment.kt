@@ -283,6 +283,7 @@ class MealLogAdapter(
             "lunch" -> "☀️ " + holder.itemView.context.getString(R.string.tab_lunch)
             "dinner" -> "🌙 " + holder.itemView.context.getString(R.string.tab_dinner)
             "snack" -> "🍎 " + holder.itemView.context.getString(R.string.tab_snack)
+            "drink" -> "🥤 " + holder.itemView.context.getString(R.string.tab_drinks)
             else -> meal.mealType.uppercase()
         }
         holder.tvMacros.text = "P: ${meal.protein.toInt()}g | C: ${meal.carbs.toInt()}g | F: ${meal.fat.toInt()}g"

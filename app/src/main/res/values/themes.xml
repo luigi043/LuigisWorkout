@@ -46,6 +46,11 @@
 
     <style name="Theme.LuigisWorkout.Main" parent="Theme.LuigisWorkout" />
 
+    <style name="Theme.LuigisWorkout.LogForm" parent="Theme.LuigisWorkout">
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">false</item>
+    </style>
+
     <style name="Theme.LuigisWorkout.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/primary_dark</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/luigis_workout</item>

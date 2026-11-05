@@ -31,10 +31,7 @@ class LogMealActivity : AppCompatActivity() {
     }
 
     private lateinit var foodSearchAdapter: FoodSearchAdapter
-    private var selectedCalories = 0
-    private var selectedProtein = 0f
-    private var selectedCarbs = 0f
-    private var selectedFat = 0f
+    private val mealTypes = listOf("breakfast", "lunch", "dinner", "snack", "drink")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,34 +41,21 @@ class LogMealActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.log_meal_label)
 
-        // Pre-fill from recipe intent extras
-        intent.extras?.let { extras ->
+        setupMealTypeSpinner()
+        if (savedInstanceState == null) intent.extras?.let { extras ->
             binding.etFoodName.setText(extras.getString("food_name", ""))
-            selectedCalories = extras.getInt("calories", 0)
-            selectedProtein = extras.getFloat("protein", 0f)
-            selectedCarbs = extras.getFloat("carbs", 0f)
-            selectedFat = extras.getFloat("fat", 0f)
-            binding.etCalories.setText(selectedCalories.toString())
-            binding.etProtein.setText(selectedProtein.toString())
-            binding.etCarbs.setText(selectedCarbs.toString())
-            binding.etFat.setText(selectedFat.toString())
+            binding.etCalories.setText(extras.getInt("calories").toString())
+            binding.etProtein.setText(extras.getFloat("protein").toString())
+            binding.etCarbs.setText(extras.getFloat("carbs").toString())
+            binding.etFat.setText(extras.getFloat("fat").toString())
 
-            val mealType = extras.getString("meal_type", "lunch")
-            binding.spinnerMealType.setSelection(getMealTypeIndex(mealType))
+            val mealIndex = mealTypes.indexOf(extras.getString("meal_type"))
+            binding.spinnerMealType.setSelection(if (mealIndex >= 0) mealIndex else 1)
         }
 
-        setupMealTypeSpinner()
         setupFoodSearch()
         setupSaveButton()
         setupObservers()
-    }
-
-    private fun getMealTypeIndex(type: String) = when (type) {
-        "breakfast" -> 0
-        "lunch" -> 1
-        "dinner" -> 2
-        "snack" -> 3
-        else -> 1
     }
 
     private fun setupMealTypeSpinner() {
@@ -79,7 +63,8 @@ class LogMealActivity : AppCompatActivity() {
             "🌅 ${getString(R.string.tab_breakfast)}",
             "☀️ ${getString(R.string.tab_lunch)}",
             "🌙 ${getString(R.string.tab_dinner)}",
-            "🍎 ${getString(R.string.tab_snack)}"
+            "🍎 ${getString(R.string.tab_snack)}",
+            "🥤 ${getString(R.string.tab_drinks)}"
         )
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, types)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -120,41 +105,48 @@ class LogMealActivity : AppCompatActivity() {
     private fun setupSaveButton() {
         binding.btnSaveMeal.setOnClickListener {
             val name = binding.etFoodName.text.toString().trim()
-            val calories = binding.etCalories.text.toString().toIntOrNull() ?: 0
-            val protein = binding.etProtein.text.toString().toFloatOrNull() ?: 0f
-            val carbs = binding.etCarbs.text.toString().toFloatOrNull() ?: 0f
-            val fat = binding.etFat.text.toString().toFloatOrNull() ?: 0f
-            val quantity = binding.etQuantity.text.toString().toFloatOrNull() ?: 1f
+            val calories = binding.etCalories.text.toString().trim().toIntOrNull()
+            val quantity = binding.etQuantity.text.toString().trim().replace(',', '.').toFloatOrNull()
 
             if (name.isEmpty()) {
                 binding.etFoodName.error = getString(R.string.enter_food_name)
                 return@setOnClickListener
             }
-            if (calories == 0) {
+            if (calories == null || calories < 0) {
                 binding.etCalories.error = getString(R.string.enter_calories)
                 return@setOnClickListener
             }
-
-            val mealType = when (binding.spinnerMealType.selectedItemPosition) {
-                0 -> "breakfast"
-                1 -> "lunch"
-                2 -> "dinner"
-                3 -> "snack"
-                else -> "lunch"
+            if (quantity == null || !quantity.isFinite() || quantity <= 0f ||
+                calories.toDouble() * quantity > Int.MAX_VALUE
+            ) {
+                binding.etQuantity.error = getString(R.string.quantity_invalid)
+                return@setOnClickListener
             }
 
+            val protein = readMacro(binding.etProtein, quantity) ?: return@setOnClickListener
+            val carbs = readMacro(binding.etCarbs, quantity) ?: return@setOnClickListener
+            val fat = readMacro(binding.etFat, quantity) ?: return@setOnClickListener
             val log = MealLog(
                 date = AppClock.todayString(),
-                mealType = mealType,
+                mealType = mealTypes.getOrElse(binding.spinnerMealType.selectedItemPosition) { "lunch" },
                 foodName = name,
-                calories = (calories * quantity).toInt(),
-                protein = protein * quantity,
-                carbs = carbs * quantity,
-                fat = fat * quantity,
+                calories = (calories.toDouble() * quantity).toInt(),
+                protein = protein,
+                carbs = carbs,
+                fat = fat,
                 quantity = quantity
             )
             viewModel.saveMeal(log)
         }
+    }
+
+    private fun readMacro(field: EditText, quantity: Float): Float? {
+        val input = field.text.toString().trim()
+        if (input.isEmpty()) return 0f
+        val total = input.replace(',', '.').toFloatOrNull()?.times(quantity)
+        if (total != null && total.isFinite() && total >= 0f) return total
+        field.error = getString(R.string.macro_invalid)
+        return null
     }
 
     private fun setupObservers() {

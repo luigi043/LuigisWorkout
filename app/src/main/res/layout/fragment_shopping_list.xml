@@ -22,7 +22,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Lista de Compras"
+                android:text="@string/shopping_list_title"
                 android:textSize="@dimen/text_xl"
                 android:textColor="@color/primary"
                 android:textStyle="bold" />
@@ -72,7 +72,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Adicionar novo item..."
+                android:hint="@string/add_item_hint"
                 app:hintTextColor="@color/text_hint"
                 app:placeholderText="ex: Frango"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -110,7 +110,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
         android:layout_margin="@dimen/spacing_md"
-        android:text="Limpar concluídos"
+        android:text="@string/clear_checked"
         android:textSize="10sp"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:textColor="@color/error" />

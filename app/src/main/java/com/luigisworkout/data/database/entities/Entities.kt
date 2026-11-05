@@ -16,7 +16,7 @@ data class MealLog(
     val carbs: Float = 0f,
     val fat: Float = 0f,
     val quantity: Float = 1f,
-    val unit: String = "porção",
+    val unit: String = "serving",
     val timestamp: Long = System.currentTimeMillis()
 )
 
