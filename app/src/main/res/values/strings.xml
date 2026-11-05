@@ -15,7 +15,7 @@
     <string name="greeting_evening">Good Evening, Luigi! ⚡</string>
     <string name="nutrition_summary">Nutrition Summary</string>
     <string name="activity_calendar">Activity Calendar</string>
-    <string name="calories_goal">Calories Goal</string>
+    <string name="calories_goal">Calorie Goal</string>
     <string name="calories_remaining_format">%1$d kcal left</string>
     <string name="water_tracker">Water</string>
     <string name="log_meal">Log Meal</string>
@@ -94,6 +94,10 @@
 
     <!-- Shopping List -->
     <string name="shopping_list_title">Shopping List</string>
+    <plurals name="shopping_pending_count">
+        <item quantity="one">%d item to buy</item>
+        <item quantity="other">%d items to buy</item>
+    </plurals>
     <string name="add_item_hint">Add item...</string>
     <string name="clear_checked">Clear Checked</string>
     <string name="no_items">No items yet</string>

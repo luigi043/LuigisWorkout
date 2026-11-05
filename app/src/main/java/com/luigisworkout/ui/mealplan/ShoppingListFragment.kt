@@ -57,17 +57,15 @@ class ShoppingListFragment : Fragment() {
         viewModel.shoppingItems.observe(viewLifecycleOwner) { items ->
             adapter.submitList(items)
             val pendingCount = items.count { !it.isChecked }
-            binding.tvItemsCount.text = if (pendingCount == 1) {
-                "1 item para comprar"
-            } else {
-                "$pendingCount itens para comprar"
-            }
+            binding.tvItemsCount.text = resources.getQuantityString(
+                R.plurals.shopping_pending_count, pendingCount, pendingCount
+            )
         }
     }
 
     private fun setupListeners() {
         binding.btnAddItem.setOnClickListener {
-            val name = binding.etItemName.text.toString()
+            val name = binding.etItemName.text.toString().trim()
             if (name.isNotEmpty()) {
                 viewModel.addShoppingItem(name)
                 binding.etItemName.text?.clear()

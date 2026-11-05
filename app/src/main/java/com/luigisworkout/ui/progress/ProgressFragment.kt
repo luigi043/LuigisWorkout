@@ -125,7 +125,7 @@ class ProgressFragment : Fragment() {
         val entries = sorted.mapIndexed { i, w -> Entry(i.toFloat(), w.weightKg) }
         val labels = sorted.map { it.date.substring(5) } // MM-DD
 
-        val dataSet = LineDataSet(entries, "Peso (kg)").apply {
+        val dataSet = LineDataSet(entries, getString(R.string.weight_hint)).apply {
             color = Color.parseColor("#4CAF50")
             valueTextColor = Color.parseColor("#333333")
             lineWidth = 2.5f
@@ -148,7 +148,7 @@ class ProgressFragment : Fragment() {
         val entries = data.mapIndexed { i, (_, cal) -> Entry(i.toFloat(), cal.toFloat()) }
         val labels = data.map { it.first.substring(5) }
 
-        val dataSet = LineDataSet(entries, "Calorias (kcal)").apply {
+        val dataSet = LineDataSet(entries, getString(R.string.calories_hint)).apply {
             color = Color.parseColor("#FF5722")
             lineWidth = 2f
             circleRadius = 3f
@@ -162,7 +162,7 @@ class ProgressFragment : Fragment() {
 
         // Goal line
         val goalEntries = data.indices.map { Entry(it.toFloat(), 1800f) }
-        val goalSet = LineDataSet(goalEntries, "Objetivo").apply {
+        val goalSet = LineDataSet(goalEntries, getString(R.string.calories_goal)).apply {
             color = Color.parseColor("#2196F3")
             lineWidth = 1.5f
             enableDashedLine(10f, 5f, 0f)
@@ -194,10 +194,10 @@ class ProgressFragment : Fragment() {
         binding.tvCurrentBmi.text = String.format("%.1f", bmi)
         binding.tvBmiCategory.text = when {
             bmi <= 0 -> "---"
-            bmi < 18.5 -> "Abaixo do peso"
-            bmi < 25 -> "Peso normal ✅"
-            bmi < 30 -> "Excesso de peso"
-            else -> "Obesidade"
+            bmi < 18.5 -> "Underweight"
+            bmi < 25 -> "Normal weight"
+            bmi < 30 -> "Overweight"
+            else -> "Obesity"
         }
     }
 
