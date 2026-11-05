@@ -74,7 +74,7 @@
                 android:layout_weight="1"
                 android:hint="@string/add_item_hint"
                 app:hintTextColor="@color/text_hint"
-                app:placeholderText="ex: Frango"
+                app:placeholderText="@string/shopping_item_example"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                 app:boxStrokeWidth="0dp"
                 app:boxStrokeWidthFocused="0dp">

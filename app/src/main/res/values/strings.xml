@@ -99,6 +99,7 @@
         <item quantity="other">%d items to buy</item>
     </plurals>
     <string name="add_item_hint">Add item...</string>
+    <string name="shopping_item_example">e.g. chicken breast</string>
     <string name="clear_checked">Clear Checked</string>
     <string name="no_items">No items yet</string>
     <string name="supermarket_any">Any</string>
