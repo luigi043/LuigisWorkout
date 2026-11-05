@@ -2,7 +2,7 @@
 
 Open the [interactive phone demo](https://luigis-workout-portfolio.vercel.app/) to try the water tracker, meal log, workout timer and checklist, and weight history. The demo stays at phone width on desktop and saves sample activity in your browser. Android notifications, the full training plan, recipe catalog, and Room data are available in the native app.
 
-See the [screen index and verification results](docs/verification/SCREEN-INDEX.md) for walkthroughs and screenshots.
+See the [screen index and verification results](docs/verification/SCREEN-INDEX.md) for walkthroughs and screenshots. Download the emulator-tested APK from the [Android debug preview](https://github.com/luigi043/LuigisWorkout/releases/tag/android-debug-0c1742a) with repository access.
 
 <a href="https://luigis-workout-portfolio.vercel.app/">
   <img src="docs/verification/browser/390-03-workout.png" alt="Interactive workout demo on a phone-width screen" width="320">
