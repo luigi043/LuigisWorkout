@@ -2,12 +2,18 @@
 
 Open the [interactive phone demo](https://luigis-workout-portfolio.vercel.app/) to try the water tracker, meal log, workout timer and checklist, and weight history. The demo stays at phone width on desktop and saves sample activity in your browser. Android notifications, the full training plan, recipe catalog, and Room data are available in the native app.
 
+See the [screen index and verification results](docs/verification/SCREEN-INDEX.md) for walkthroughs and screenshots.
+
+<a href="https://luigis-workout-portfolio.vercel.app/">
+  <img src="docs/verification/browser/390-03-workout.png" alt="Interactive workout demo on a phone-width screen" width="320">
+</a>
+
 [![Android Version](https://img.shields.io/badge/Android-8.0%2B-green.svg)](https://developer.android.com/)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9-blue.svg)](https://kotlinlang.org/)
 [![MVVM](https://img.shields.io/badge/Architecture-MVVM-orange.svg)](https://developer.android.com/topic/libraries/architecture/viewmodel)
 [![SafeToOffline](https://img.shields.io/badge/Offline-First-blueviolet.svg)](https://developer.android.com/training/data-storage/room)
 
-**Luigi's Workout** is a premium, offline-first Android application designed for targeted weight loss (115kg to ~95kg goal). It combines structured 12-week training phases, precision calorie tracking with a Portuguese supermarket focus, and local progress monitoring.
+**Luigi's Workout** is an Android app for following a 12-week training plan and logging workouts, meals, water, and weight. It keeps logs on the device and includes recipes based on ingredients from Portuguese supermarkets.
 
 ---
 
