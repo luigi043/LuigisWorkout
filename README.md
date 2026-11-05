@@ -1,5 +1,7 @@
 # 🏋️‍♂️ Luigi's Workout
 
+Open the [interactive phone demo](https://luigis-workout-portfolio.vercel.app/) to try the water tracker, meal log, workout timer and checklist, and weight history. The demo stays at phone width on desktop and saves sample activity in your browser. Android notifications, the full training plan, recipe catalog, and Room data are available in the native app.
+
 [![Android Version](https://img.shields.io/badge/Android-8.0%2B-green.svg)](https://developer.android.com/)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9-blue.svg)](https://kotlinlang.org/)
 [![MVVM](https://img.shields.io/badge/Architecture-MVVM-orange.svg)](https://developer.android.com/topic/libraries/architecture/viewmodel)

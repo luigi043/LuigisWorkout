@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Luigi's Workout | Interactive demo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#080d16;color:#eef3ff;font:16px system-ui,sans-serif}
+.phone{width:min(100%,430px);margin:0 auto;min-height:100dvh;background:#111b2a;display:flex;flex-direction:column}
+header,main,footer{padding:20px}header{background:#17263a}main{flex:1}h1,h2,h3,p{margin:0 0 12px}h1{font-size:1.65rem}small,p{color:#c1d0e5}article,form{background:#1a2a40;border-radius:16px;padding:16px;margin:0 0 14px}
+button,input,select{font:inherit;border-radius:10px;min-height:44px}button{border:0;background:#9aefcd;color:#102d23;padding:8px 12px;font-weight:700;cursor:pointer}button.secondary{background:#2b415d;color:#fff}button:disabled{opacity:.55;cursor:default}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:#111b2a;padding:8px;position:sticky;bottom:0}nav button{padding:6px 2px;background:#243752;color:#fff}nav button[aria-current="page"]{background:#9aefcd;color:#102d23}
+label{display:block;margin:8px 0}input:not([type=checkbox]),select{display:block;width:100%;border:1px solid #62809e;background:#101b2b;color:#fff;padding:8px}input[type=checkbox]{min-height:0;width:22px;height:22px;vertical-align:middle}label.exercise{padding:8px 0}ul{padding-left:20px}li{margin:6px 0;overflow-wrap:anywhere}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #fff;outline-offset:3px}a{color:#a5eaff}footer{font-size:.82rem}#notice{min-height:1.4em;margin:0;color:#a9efcc}
+</style>
+<div class="phone">
+<header><h1>Luigi's Workout</h1><small>Training, meals and progress · Interactive portfolio demo</small></header>
+<main id="screen"></main>
+<footer><p id="notice" role="status"></p><p>Demo data stays in this browser. Android reminders, exercise videos and Room storage are part of the native app.</p><a href="https://github.com/luigi043/LuigisWorkout">Android source on GitHub</a> · <button id="reset" class="secondary">Reset demo</button></footer>
+<nav aria-label="Demo screens"><button data-tab="Home">Home</button><button data-tab="Meals">Meals</button><button data-tab="Workout">Workout</button><button data-tab="Progress">Progress</button></nav>
+</div>
+<script type="module" src="demo.js"></script>
+</html>
