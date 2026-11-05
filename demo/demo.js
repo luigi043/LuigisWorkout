@@ -126,8 +126,11 @@ document.addEventListener('click', event => {
 
 screen.addEventListener('change', event => {
   const field = event.target;
-  if (field.id === 'day') day = field.value;
-  else if ('exercise' in field.dataset) {
+  if (field.id === 'day') {
+    day = field.value;
+    render();
+    document.getElementById('day').focus();
+  } else if ('exercise' in field.dataset) {
     const index = Number(field.dataset.exercise);
     if (field.checked) completed.add(index);
     else completed.delete(index);

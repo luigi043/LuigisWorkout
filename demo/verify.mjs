@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE
   ? pathToFileURL(process.env.PLAYWRIGHT_MODULE).href : 'playwright');
@@ -17,7 +17,7 @@ try {
     const capture = async name => {
       assert.ok(await page.locator('.phone').evaluate(node => node.clientWidth) <= 430);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-      if (width !== 320) await page.screenshot({ path: new URL(`${width}-${name}.png`, folder).pathname.replace(/^\/(?=[A-Z]:)/i, '').replaceAll('%20', ' '), fullPage: true });
+      if (width !== 320) await page.screenshot({ path: fileURLToPath(new URL(`${width}-${name}.png`, folder)), fullPage: true });
     };
     assert.equal((await page.goto(base)).status(), 200);
     await page.getByRole('button', { name: 'Add a glass' }).click();
@@ -30,6 +30,7 @@ try {
     await capture('02-meals');
     await tab('Workout');
     await page.getByLabel('Training day').selectOption('Legs');
+    await page.getByRole('checkbox', { name: 'Goblet squat' }).waitFor();
     await page.getByRole('button', { name: 'Start', exact: true }).click();
     await page.getByRole('button', { name: 'Pause', exact: true }).waitFor();
     await page.getByRole('checkbox', { name: 'Goblet squat' }).check();
