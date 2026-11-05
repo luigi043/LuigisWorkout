@@ -18,12 +18,6 @@ captures/
 cmake-build-*/
 .DS_Store
 
-# User-specific / Local
-gradlew
-gradlew.bat
-gradle/wrapper/gradle-wrapper.jar
-gradle/wrapper/gradle-wrapper.properties
-
 # Log files
 *.log
 

@@ -106,10 +106,15 @@ LuigisWorkout/
    ```
 2. **Open in Android Studio:**
    - Go to `File > Open` and select the project folder.
-   - Wait for Gradle to sync (Java 17 required).
+   - Set the Gradle JDK to JDK 17 and install Android SDK Platform 34.
+   - Sync with the included Gradle 8.2.1 wrapper.
 3. **Run on Device/Emulator:**
    - Minimum SDK: API 26 (Android 8.0)
    - Target SDK: API 34 (Android 14)
+
+On Windows, run `gradlew.bat assembleDebug testDebugUnitTest`. On macOS or Linux,
+run `./gradlew assembleDebug testDebugUnitTest`. The debug APK is written to
+`app/build/outputs/apk/debug/app-debug.apk`.
 
 ---
 
